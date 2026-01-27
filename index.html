@@ -1,297 +1,570 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>תל אביב קייט | מדידות חוף</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>תל אביב קייט | מדידות חוף</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-* { font-family: 'Assistant', sans-serif; }
+  <style>
+    * { font-family: 'Assistant', sans-serif; }
 
-/* ===== COLOR SYSTEM (sun-readable) ===== */
-:root{
-  --bg-main:#eaf6ff;
-  --card:#ffffff;
-  --primary:#0284c7;
-  --accent:#0ea5e9;
-  --wind:#0369a1;
-  --text-main:#0f172a;
-  --text-soft:#475569;
-  --border-soft:#cbd5e1;
-  --highlight:#fde047;
-}
+    :root{
+      --bg1:#f0f9ff;
+      --bg2:#e0f2fe;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --border:#cbd5e1;
+      --brand:#0284c7;
+      --brand2:#0ea5e9;
+      --wind:#0369a1;
+    }
 
-body{
-  background: linear-gradient(180deg,#f0f9ff,#e0f2fe);
-  color: var(--text-main);
-  min-height:100vh;
-}
+    body{
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-/* ===== LAYOUT ===== */
-.card{
-  background:var(--card);
-  border-radius:18px;
-  border:1px solid var(--border-soft);
-  box-shadow:0 8px 24px rgba(2,132,199,.08);
-}
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(2,132,199,.10);
+    }
 
-.badge{
-  font-size:.7rem;
-  background:#e0f2fe;
-  color:var(--primary);
-  padding:.15rem .5rem;
-  border-radius:999px;
-}
+    .badge{
+      font-size:.72rem;
+      background:#e0f2fe;
+      color: var(--brand);
+      padding:.18rem .55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(2,132,199,.22);
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      white-space: nowrap;
+    }
 
-/* ===== COMPASS ===== */
-.compass{
-  width:140px;
-  height:140px;
-  border-radius:50%;
-  border:2px solid var(--border-soft);
-  position:relative;
-  background:#f8fafc;
-}
+    .btn{
+      background: rgba(2,132,199,.12);
+      border: 1px solid rgba(2,132,199,.22);
+      color: var(--brand);
+      padding: .45rem .7rem;
+      border-radius: 12px;
+      transition: .2s;
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .btn:hover{ background: rgba(2,132,199,.18); }
+    .btn:active{ transform: translateY(1px); }
 
-.compass::after{
-  content:"";
-  position:absolute;
-  inset:10px;
-  border-radius:50%;
-  border:1px dashed #94a3b8;
-}
+    /* ===== Compass (clean, sun-readable) ===== */
+    .compass{
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #f8fafc;
+      position: relative;
+      box-shadow: inset 0 0 0 10px rgba(14,165,233,.08);
+    }
+    .compass::after{
+      content:"";
+      position:absolute;
+      inset:14px;
+      border-radius:50%;
+      border:1px dashed #94a3b8;
+    }
+    .compass-degree{
+      position:absolute;
+      font-size:.68rem;
+      color:#64748b;
+      font-weight:700;
+      background: rgba(255,255,255,.85);
+      border:1px solid rgba(203,213,225,.8);
+      padding:.05rem .28rem;
+      border-radius: 8px;
+    }
+    .deg-n{top:6px;left:50%;transform:translateX(-50%)}
+    .deg-e{right:6px;top:50%;transform:translateY(-50%)}
+    .deg-s{bottom:6px;left:50%;transform:translateX(-50%)}
+    .deg-w{left:6px;top:50%;transform:translateY(-50%)}
 
-.compass-degree{
-  position:absolute;
-  font-size:.65rem;
-  color:#64748b;
-}
+    .compass-arrow{
+      position:absolute;
+      bottom:50%;
+      left:50%;
+      width: 5px;
+      height: 54px;
+      border-radius: 999px;
+      background: linear-gradient(to top,var(--brand2),var(--brand));
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(0deg);
+      box-shadow: 0 6px 12px rgba(2,132,199,.22);
+    }
+    .compass-arrow::after{
+      content:"";
+      position:absolute;
+      top:-10px;
+      left:50%;
+      transform: translateX(-50%);
+      border-left:9px solid transparent;
+      border-right:9px solid transparent;
+      border-bottom:12px solid var(--brand);
+    }
 
-.deg-n{top:6px;left:50%;transform:translateX(-50%)}
-.deg-e{right:6px;top:50%;transform:translateY(-50%)}
-.deg-s{bottom:6px;left:50%;transform:translateX(-50%)}
-.deg-w{left:6px;top:50%;transform:translateY(-50%)}
+    /* ===== History chart ===== */
+    .history-container{
+      position:relative;
+      height: 210px;
+      background: #f8fafc;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .history-bar{
+      position:absolute;
+      bottom:0;
+      border-radius: 3px 3px 0 0;
+      transition: .15s;
+    }
+    .history-bar:hover{
+      opacity:.85;
+      transform: scaleX(1.5);
+      z-index: 5;
+    }
+    .wind-weak{background:#94a3b8}
+    .wind-light{background:#22c55e}
+    .wind-good{background:#3b82f6}
+    .wind-strong{background:#f59e0b}
+    .wind-extreme{background:#ef4444}
 
-.compass-arrow{
-  position:absolute;
-  bottom:50%;
-  left:50%;
-  width:4px;
-  height:46px;
-  background:linear-gradient(to top,var(--accent),var(--primary));
-  transform-origin:bottom center;
-  transform:translateX(-50%) rotate(0deg);
-  border-radius:2px;
-}
+    .time-label{
+      position:absolute;
+      bottom: -20px;
+      font-size:.68rem;
+      color:#64748b;
+      transform: translateX(50%);
+      white-space: nowrap;
+    }
+    .direction-arrow{
+      position:absolute;
+      top: 6px;
+      font-size:.62rem;
+      color: rgba(15,23,42,.65);
+      transform: translateX(50%);
+    }
 
-.compass-arrow::after{
-  content:"";
-  position:absolute;
-  top:-8px;
-  left:-5px;
-  border-left:7px solid transparent;
-  border-right:7px solid transparent;
-  border-bottom:10px solid var(--primary);
-}
+    /* ===== Tight table (mobile friendly) ===== */
+    .table-tight th, .table-tight td{
+      padding: .28rem .42rem;
+      font-size: .82rem;
+      vertical-align: middle;
+    }
+    @media (max-width: 640px){
+      .table-tight th, .table-tight td{ font-size: .72rem; padding: .25rem .34rem; }
+    }
 
-/* ===== HISTORY ===== */
-.history-container{
-  position:relative;
-  height:200px;
-  background:#f8fafc;
-  border-radius:14px;
-  border:1px solid var(--border-soft);
-  overflow:hidden;
-}
-
-.history-bar{
-  position:absolute;
-  bottom:0;
-  border-radius:3px 3px 0 0;
-}
-
-.wind-weak{background:#94a3b8}
-.wind-light{background:#22c55e}
-.wind-good{background:#3b82f6}
-.wind-strong{background:#f59e0b}
-.wind-extreme{background:#ef4444}
-
-.table-tight td,.table-tight th{
-  padding:.3rem .4rem;
-  font-size:.8rem;
-}
-
-@media(max-width:640px){
-  .table-tight td,.table-tight th{font-size:.72rem}
-}
-</style>
+    /* ===== Interval buttons ===== */
+    .seg{
+      background: rgba(148,163,184,.20);
+      border: 1px solid rgba(148,163,184,.35);
+      border-radius: 999px;
+      padding: .2rem;
+      display:inline-flex;
+      gap:.25rem;
+    }
+    .seg button{
+      padding:.38rem .7rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: .85rem;
+      color: #334155;
+      transition:.15s;
+      border:1px solid transparent;
+    }
+    .seg button.active{
+      background: #ffffff;
+      border-color: rgba(2,132,199,.25);
+      color: var(--brand);
+      box-shadow: 0 6px 16px rgba(2,132,199,.12);
+    }
+  </style>
 </head>
 
 <body class="px-4 py-6">
-
-<header class="max-w-6xl mx-auto mb-6 flex justify-between items-center">
-  <div>
-    <h1 class="text-2xl font-bold">תל אביב קייט</h1>
-    <p class="text-sm text-slate-500">מדד החוף</p>
-  </div>
-  <span class="badge">LIVE</span>
-</header>
-
-<main class="max-w-6xl mx-auto space-y-6">
-
-<!-- ===== MAIN DASHBOARD ===== -->
-<div class="card p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-
-  <!-- WIND -->
-  <div class="md:col-span-2">
-    <p class="text-sm text-slate-500 mb-1">מהירות רוח ממוצעת</p>
-    <div class="flex items-end gap-3">
-      <span id="currentSpeed" class="text-6xl font-bold text-[color:var(--wind)]">--</span>
-      <span class="text-xl mb-1">קשר</span>
-    </div>
-
-    <div class="grid grid-cols-4 gap-4 mt-4 text-center">
-      <div>
-        <p class="text-xs text-slate-500">כיוון</p>
-        <p id="windDir" class="font-semibold">--</p>
-      </div>
-      <div>
-        <p class="text-xs text-slate-500">משבים</p>
-        <p id="windGust" class="font-semibold text-orange-500">--</p>
-      </div>
-      <div>
-        <p class="text-xs text-slate-500">מים</p>
-        <p id="waterTempMain" class="font-semibold text-teal-600">--</p>
-      </div>
-      <div>
-        <p class="text-xs text-slate-500">חוף</p>
-        <p id="temp" class="font-semibold">--</p>
+  <header class="max-w-6xl mx-auto mb-5 flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight">תל אביב קייט</h1>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="badge"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>LIVE</span>
+        <span class="text-sm text-slate-500">שעון: <span id="israelTime" class="font-mono text-slate-700">--:--:--</span></span>
       </div>
     </div>
-  </div>
 
-  <!-- COMPASS -->
-  <div class="flex justify-center items-center">
-    <div class="compass">
-      <div class="compass-degree deg-n">0°</div>
-      <div class="compass-degree deg-e">90°</div>
-      <div class="compass-degree deg-s">180°</div>
-      <div class="compass-degree deg-w">270°</div>
-      <div id="compassArrow" class="compass-arrow"></div>
-    </div>
-  </div>
-</div>
+    <button onclick="fetchLiveData()" class="btn">
+      <i class="fas fa-rotate" id="refreshIcon"></i>
+      רענון
+    </button>
+  </header>
 
-<!-- ===== HISTORY ===== -->
-<div class="card p-6">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-bold">היסטוריית רוח</h2>
-    <div class="flex gap-2">
-      <button onclick="setIntervalMode('1min')" id="btn-1min" class="badge">1 דקה</button>
-      <button onclick="setIntervalMode('15min')" id="btn-15min" class="badge">15 דקות</button>
-    </div>
-  </div>
+  <main class="max-w-6xl mx-auto space-y-6">
 
-  <div class="history-container mb-6" id="historyChart"></div>
+    <!-- Dashboard -->
+    <section class="card p-5 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Main wind -->
+      <div class="md:col-span-2">
+        <p class="text-sm text-slate-500 mb-1">מהירות רוח ממוצעת</p>
+        <div class="flex items-end gap-3">
+          <span id="currentSpeed" class="text-6xl font-extrabold" style="color:var(--wind)">--</span>
+          <span class="text-xl mb-1 font-bold">קשר</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">המרה: m/s × 1.94</p>
 
-  <div class="overflow-x-auto">
-    <table class="w-full table-tight text-right">
-      <thead class="text-slate-500 border-b">
-        <tr>
-          <th>שעה</th>
-          <th>רוח</th>
-          <th>משבים</th>
-          <th class="text-center">כיוון</th>
-          <th>גל</th>
-          <th>מים</th>
-        </tr>
-      </thead>
-      <tbody id="recentHoursTable"></tbody>
-    </table>
-  </div>
-</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-center">
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">כיוון</p>
+            <p id="windDir" class="font-extrabold">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">משבים</p>
+            <p id="windGust" class="font-extrabold text-orange-600">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">מים</p>
+            <p id="waterTempMain" class="font-extrabold text-teal-700">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">חוף</p>
+            <p id="temp" class="font-extrabold">--</p>
+          </div>
+        </div>
+      </div>
 
-</main>
+      <!-- Compass -->
+      <div class="flex items-center justify-center">
+        <div class="compass">
+          <div class="compass-degree deg-n">0°</div>
+          <div class="compass-degree deg-e">90°</div>
+          <div class="compass-degree deg-s">180°</div>
+          <div class="compass-degree deg-w">270°</div>
+          <div id="compassArrow" class="compass-arrow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Side mini cards -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="card p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-extrabold">גובה גל</p>
+          <span class="badge">מודל</span>
+        </div>
+        <div class="mt-2 flex items-end gap-2">
+          <span id="waveHeight" class="text-4xl font-extrabold text-amber-600">--</span>
+          <span class="text-sm text-slate-500 mb-1">מ׳</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">אזור: בת ים / הרצליה</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">טמפרטורת מים</p>
+        <p id="waterTempSide" class="text-4xl font-extrabold text-teal-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">SST</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">הילטון <span class="text-xs text-slate-500 font-semibold">(צפון)</span></p>
+        <p id="speed1" class="text-4xl font-extrabold text-sky-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">קשר</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">צ'רלס קלור <span class="text-xs text-slate-500 font-semibold">(מרכז)</span></p>
+        <p id="speed2" class="text-4xl font-extrabold text-sky-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">קשר</p>
+        <p class="text-xs text-slate-400 mt-1">יפו מופיע בטבלה</p>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="card p-5 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-lg font-extrabold">היסטוריה (24 שעות)</h2>
+          <p class="text-sm text-slate-500">הכפתורים משנים גם את הגרף וגם את הטבלה</p>
+        </div>
+
+        <div class="seg">
+          <button id="btn-1min" class="active" onclick="setIntervalMode('1min')">כל דקה</button>
+          <button id="btn-15min" onclick="setIntervalMode('15min')">15 דקות</button>
+        </div>
+      </div>
+
+      <div class="history-container mb-6" id="historyChart">
+        <div class="absolute inset-0 flex items-center justify-center text-slate-400">טוען נתונים…</div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-right table-tight">
+          <thead class="text-slate-500 border-b border-slate-200">
+            <tr>
+              <th class="whitespace-nowrap">שעה</th>
+              <th class="whitespace-nowrap">רוח</th>
+              <th class="whitespace-nowrap">משבים</th>
+              <th class="text-center whitespace-nowrap">כיוון</th>
+              <th class="whitespace-nowrap">גל</th>
+              <th class="whitespace-nowrap">מים</th>
+            </tr>
+          </thead>
+          <tbody id="recentHoursTable">
+            <tr><td colspan="6" class="text-center py-6 text-slate-400">אין נתונים</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
 
 <script>
-const KNOTS=1.94384;
-const state={readings:[],currentInterval:'1min'};
+  const OWM_API_KEY = '0429ca60a348cdac63a6cc4547a6837d';
+  const KNOTS = 1.94384;
+  const ISRAEL_TZ = 'Asia/Jerusalem';
 
-function msToKnots(ms){return (ms*KNOTS).toFixed(1);}
-function getDir(deg){
-  const d=['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
-  return d[Math.round(deg/45)%8];
-}
-function getWindClass(k){
-  if(k<10)return'wind-weak';
-  if(k<15)return'wind-light';
-  if(k<20)return'wind-good';
-  if(k<25)return'wind-strong';
-  return'wind-extreme';
-}
+  const WAVE_COORDS = { lat: 32.1656, lon: 34.8368 }; // Herzliya marine point
 
-function setIntervalMode(m){
-  state.currentInterval=m;
-  renderHistory();
-}
+  const windSensors = [
+    { id: 1, lat: 32.1101, lon: 34.7795, name: 'הילטון' },
+    { id: 2, lat: 32.0631, lon: 34.7636, name: 'קלור' },
+    { id: 3, lat: 32.0500, lon: 34.7500, name: 'יפו' }
+  ];
 
-/* ===== DEMO DATA (replace with your fetch) ===== */
-setInterval(()=>{
-  const deg=Math.random()*360;
-  const speed=5+Math.random()*8;
-  state.readings.push({
-    timestamp:new Date(),
-    speed,
-    deg,
-    gust:speed*1.3,
-    wave:.6+Math.random()*.5,
-    waterTemp:22
-  });
-  if(state.readings.length>300)state.readings.shift();
+  const state = {
+    readings: [],
+    currentInterval: '1min'
+  };
 
-  document.getElementById('currentSpeed').textContent=msToKnots(speed);
-  document.getElementById('windDir').textContent=getDir(deg);
-  document.getElementById('windGust').textContent=msToKnots(speed*1.3);
-  document.getElementById('waterTempMain').textContent='22°';
-  document.getElementById('temp').textContent='25°';
-  document.getElementById('compassArrow').style.transform=`translateX(-50%) rotate(${deg}deg)`;
+  function msToKnots(ms){ return (ms * KNOTS).toFixed(1); }
 
-  renderHistory();
-},2000);
+  function getWindClass(knots){
+    if (knots < 10) return 'wind-weak';
+    if (knots < 15) return 'wind-light';
+    if (knots < 20) return 'wind-good';
+    if (knots < 25) return 'wind-strong';
+    return 'wind-extreme';
+  }
 
-function renderHistory(){
-  const data=state.readings.slice(-30);
-  const c=document.getElementById('historyChart');
-  c.innerHTML='';
-  const max=Math.max(...data.map(d=>d.speed),1);
-  data.forEach((p,i)=>{
-    const b=document.createElement('div');
-    const k=p.speed*KNOTS;
-    b.className=`history-bar ${getWindClass(k)}`;
-    b.style.height=`${(p.speed/max)*140}px`;
-    b.style.left=`${i*10}px`;
-    b.style.width='6px';
-    c.appendChild(b);
-  });
+  function getDir(deg){
+    const dirs = ['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
+    return dirs[Math.round(deg / 45) % 8];
+  }
 
-  document.getElementById('recentHoursTable').innerHTML=data.slice(-10).reverse().map(p=>{
-    return`
-    <tr>
-      <td>${p.timestamp.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}</td>
-      <td>${msToKnots(p.speed)}</td>
-      <td class="text-orange-500">${msToKnots(p.gust)}</td>
-      <td class="text-center">
-        <i class="fas fa-arrow-up text-sky-600" style="transform:rotate(${p.deg}deg)"></i>
-      </td>
-      <td>${p.wave.toFixed(1)}</td>
-      <td>${p.waterTemp}°</td>
-    </tr>`;
-  }).join('');
-}
+  function formatIsraelTime(date){
+    return date.toLocaleTimeString('he-IL', {
+      timeZone: ISRAEL_TZ,
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    });
+  }
+
+  // Clock
+  setInterval(() => {
+    const el = document.getElementById('israelTime');
+    if (el) el.textContent = formatIsraelTime(new Date());
+  }, 1000);
+
+  function setIntervalMode(mode){
+    state.currentInterval = mode;
+    document.getElementById('btn-1min').classList.toggle('active', mode === '1min');
+    document.getElementById('btn-15min').classList.toggle('active', mode === '15min');
+    renderHistory();
+  }
+
+  async function fetchLiveData(){
+    const refreshIcon = document.getElementById('refreshIcon');
+    if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+    // Wind from OpenWeatherMap (3 points)
+    const windPromises = windSensors.map(s =>
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${s.lat}&lon=${s.lon}&appid=${OWM_API_KEY}&units=metric&lang=he`)
+        .then(r => r.json())
+        .then(data => ({
+          speed: data.wind?.speed ?? 0,
+          deg: data.wind?.deg ?? 0,
+          gust: data.wind?.gust ?? ((data.wind?.speed ?? 0) * 1.2),
+          temp: data.main?.temp ?? 0
+        }))
+    );
+
+    // Wave + SST from Open-Meteo marine
+    const wavePromise = fetch(
+      `https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.lat}&longitude=${WAVE_COORDS.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`
+    )
+      .then(r => r.json())
+      .then(data => ({
+        wave: data.current?.wave_height ?? 0.6,
+        waterTemp: data.current?.sea_surface_temperature ?? 23
+      }))
+      .catch(() => ({ wave: 0.6, waterTemp: 23 }));
+
+    const [windResults, waveResult] = await Promise.all([Promise.all(windPromises), wavePromise]);
+
+    const avgSpeed = windResults.reduce((a,b) => a + b.speed, 0) / windResults.length;
+    const avgDeg   = windResults.reduce((a,b) => a + b.deg, 0) / windResults.length;
+    const avgGust  = windResults.reduce((a,b) => a + b.gust, 0) / windResults.length;
+
+    const reading = {
+      timestamp: new Date(),
+      speed: avgSpeed,
+      deg: avgDeg,
+      gust: avgGust,
+      wave: waveResult.wave,
+      waterTemp: waveResult.waterTemp,
+      temp: windResults[0]?.temp ?? 0,
+      sensors: windResults // keep last raw for per-point display
+    };
+
+    state.readings.push(reading);
+    if (state.readings.length > 1440) state.readings.shift(); // 24h @ 1/min
+
+    // Update UI
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    setText('currentSpeed', msToKnots(avgSpeed));
+    setText('windDir', getDir(avgDeg));
+    setText('windGust', msToKnots(avgGust));
+    setText('temp', (reading.temp ?? 0).toFixed(0) + '°');
+    setText('waterTempMain', (waveResult.waterTemp ?? 23).toFixed(0) + '°');
+    setText('waterTempSide', (waveResult.waterTemp ?? 23).toFixed(0) + '°');
+    setText('waveHeight', (waveResult.wave ?? 0.6).toFixed(1));
+
+    // Compass
+    const arrow = document.getElementById('compassArrow');
+    if (arrow) arrow.style.transform = `translateX(-50%) rotate(${avgDeg}deg)`;
+
+    // Per-point (show Hilton + Clor + show Jaffa in table only, but still update if present elsewhere)
+    setText('speed1', msToKnots(windResults[0]?.speed ?? 0));
+    setText('speed2', msToKnots(windResults[1]?.speed ?? 0));
+    // If you later add speed3 element again, this won't break:
+    const speed3 = document.getElementById('speed3');
+    if (speed3) speed3.textContent = msToKnots(windResults[2]?.speed ?? 0);
+
+    if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+    renderHistory();
+  }
+
+  function aggregateEvery15(readings){
+    const out = [];
+    for (let i = 0; i < readings.length; i += 15){
+      const chunk = readings.slice(i, i + 15);
+      if (!chunk.length) continue;
+      out.push({
+        timestamp: chunk[Math.floor(chunk.length/2)].timestamp,
+        speed: chunk.reduce((a,b)=>a + b.speed, 0) / chunk.length,
+        deg: chunk.reduce((a,b)=>a + b.deg, 0) / chunk.length,
+        gust: chunk.reduce((a,b)=>a + b.gust, 0) / chunk.length,
+        wave: chunk.reduce((a,b)=>a + b.wave, 0) / chunk.length,
+        waterTemp: chunk.reduce((a,b)=>a + b.waterTemp, 0) / chunk.length,
+      });
+    }
+    return out;
+  }
+
+  function renderHistory(){
+    if (!state.readings.length) return;
+
+    const last24h = state.readings.filter(r => (new Date() - r.timestamp) / (1000*60*60) <= 24);
+    let dataToShow = (state.currentInterval === '15min') ? aggregateEvery15(last24h) : last24h;
+    if (!dataToShow.length) return;
+
+    // Chart
+    const container = document.getElementById('historyChart');
+    container.innerHTML = '';
+
+    const maxSpeed = Math.max(...dataToShow.map(d => d.speed), 0.1);
+    const w = container.clientWidth || 800;
+
+    // bar width adaptive (avoid too thin on 1min)
+    const padding = 18;
+    const usable = Math.max(200, w - padding*2);
+    const barW = Math.max(2, Math.floor(usable / dataToShow.length));
+    const leftStart = padding;
+
+    dataToShow.forEach((p, i) => {
+      const knots = p.speed * KNOTS;
+      const h = (p.speed / maxSpeed) * 155;
+      const left = leftStart + i * barW;
+
+      const bar = document.createElement('div');
+      bar.className = `history-bar ${getWindClass(knots)}`;
+      bar.style.height = `${h}px`;
+      bar.style.left = `${left}px`;
+      bar.style.width = `${Math.max(2, barW - 1)}px`;
+
+      const timeStr = p.timestamp.toLocaleTimeString('he-IL', {
+        timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+      });
+      bar.title = `${knots.toFixed(1)} קשר • ${getDir(p.deg)} • ${timeStr}`;
+
+      // Sparse labels/arrows
+      const arrowInterval = (state.currentInterval === '1min') ? 30 : 2;
+      const labelInterval = (state.currentInterval === '1min') ? 60 : 2;
+
+      if (i % arrowInterval === 0){
+        const a = document.createElement('div');
+        a.className = 'direction-arrow';
+        a.style.left = `${left + barW/2}px`;
+        a.innerHTML = `<i class="fas fa-arrow-up" style="transform: rotate(${p.deg}deg); display:inline-block;"></i>`;
+        container.appendChild(a);
+      }
+
+      if (i % labelInterval === 0){
+        const l = document.createElement('div');
+        l.className = 'time-label';
+        l.style.left = `${left}px`;
+        l.textContent = timeStr;
+        container.appendChild(l);
+      }
+
+      container.appendChild(bar);
+    });
+
+    // Table (last 20 rows)
+    const table = document.getElementById('recentHoursTable');
+    const recent = dataToShow.slice(-20).reverse();
+    table.innerHTML = recent.map(p => {
+      const timeStr = p.timestamp.toLocaleTimeString('he-IL', {
+        timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+      });
+      return `
+        <tr class="border-b border-slate-200 hover:bg-slate-50">
+          <td class="whitespace-nowrap font-mono text-slate-700">${timeStr}</td>
+          <td class="font-extrabold text-slate-900">${msToKnots(p.speed)}</td>
+          <td class="font-extrabold text-orange-600">${msToKnots(p.gust)}</td>
+          <td class="text-center">
+            <i class="fas fa-arrow-up text-sky-700" title="${getDir(p.deg)}"
+               style="transform: rotate(${p.deg}deg); display:inline-block;"></i>
+          </td>
+          <td class="whitespace-nowrap text-amber-700 font-bold">${(p.wave ?? 0).toFixed(1)}</td>
+          <td class="whitespace-nowrap text-teal-700 font-bold">${(p.waterTemp ?? 0).toFixed(0)}°</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Start
+  fetchLiveData();
+  setInterval(fetchLiveData, 60000);
+  window.addEventListener('resize', () => renderHistory());
 </script>
 </body>
 </html>
