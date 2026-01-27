@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -11,159 +12,112 @@
 
   <style>
     * { font-family: 'Assistant', sans-serif; }
-    body {
+    body{
       background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0c4a6e 100%);
       min-height: 100vh;
       color: #e0f2fe;
     }
-    .glass-panel {
+    .glass-panel{
       background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(56, 189, 248, 0.2);
     }
-    .glass-card {
+    .glass-card{
       background: rgba(30, 41, 59, 0.7);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(56, 189, 248, 0.15);
     }
-    .compass-ring {
+    .compass-ring{
       background: conic-gradient(from 0deg, #0ea5e9, #0284c7, #0ea5e9);
       border-radius: 50%;
       padding: 3px;
     }
-    .compass-inner {
+    .compass-inner{
       background: #0f172a;
       border-radius: 50%;
     }
-    .live-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-      color: #4ade80;
+    .live-indicator{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      font-size:.75rem;
+      color:#4ade80;
     }
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background: #22c55e;
-      border-radius: 50%;
-      animation: pulse-live 2s infinite;
+    .live-dot{
+      width:8px;height:8px;background:#22c55e;border-radius:50%;
+      animation:pulse-live 2s infinite;
     }
-    @keyframes pulse-live {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.5}}
 
-    .camera-frame {
-      background: #000;
-      border: 2px solid rgba(56, 189, 248, 0.3);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .interval-btn { transition: all 0.3s; }
-    .interval-btn.active {
+    .interval-btn{transition:all .3s}
+    .interval-btn.active{
       background: rgba(56, 189, 248, 0.3);
       border-color: rgba(56, 189, 248, 0.6);
       color: #38bdf8;
     }
-
-    .timezone-badge {
-      font-size: 0.65rem;
+    .timezone-badge{
+      font-size:.65rem;
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
+      padding:.15rem .4rem;
+      border-radius:4px;
       border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
-    .link-pill {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(29, 78, 216, 0.1));
-      border: 1px solid rgba(59, 130, 246, 0.4);
-    }
-
-    .wave-card {
+    .wave-card{
       background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.1));
       border: 1px solid rgba(234, 179, 8, 0.3);
     }
 
     /* History chart */
-    .history-container {
-      position: relative;
-      height: 220px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 12px;
-      overflow: hidden;
+    .history-container{
+      position:relative;
+      height:220px;
+      background: rgba(0,0,0,0.3);
+      border-radius:12px;
+      overflow:hidden;
     }
-    .history-bar {
-      position: absolute;
-      bottom: 0;
-      width: 3px;
-      border-radius: 2px 2px 0 0;
-      transition: all 0.3s;
+    .history-bar{
+      position:absolute;
+      bottom:0;
+      border-radius:2px 2px 0 0;
+      transition: all .3s;
     }
-    .history-bar:hover {
-      opacity: 0.85;
-      transform: scaleX(1.8);
-      z-index: 10;
-    }
-    .wind-weak { background: #94a3b8; }
-    .wind-light { background: #22c55e; }
-    .wind-good { background: #3b82f6; }
-    .wind-strong { background: #f59e0b; }
-    .wind-extreme { background: #ef4444; }
+    .history-bar:hover{opacity:.85;transform:scaleX(1.8);z-index:10}
 
-    .time-label {
-      position: absolute;
-      bottom: -25px;
-      font-size: 0.7rem;
-      color: #64748b;
-      transform: translateX(50%);
-      white-space: nowrap;
+    .wind-weak{background:#94a3b8}
+    .wind-light{background:#22c55e}
+    .wind-good{background:#3b82f6}
+    .wind-strong{background:#f59e0b}
+    .wind-extreme{background:#ef4444}
+
+    .time-label{
+      position:absolute;
+      bottom:-22px;
+      font-size:.68rem;
+      color:#64748b;
+      transform:translateX(50%);
+      white-space:nowrap;
     }
-    .direction-arrow {
-      position: absolute;
-      top: 5px;
-      font-size: 0.6rem;
-      color: rgba(255, 255, 255, 0.8);
-      transform: translateX(50%);
+    .direction-arrow{
+      position:absolute;
+      top:5px;
+      font-size:.6rem;
+      color: rgba(255,255,255,.8);
+      transform:translateX(50%);
     }
 
-    /* Video-only responsive crop */
-    :root{
-      --cam-scale: 1.55;
-      --cam-top: -220px;
-      --cam-right: -260px;
-      --cam-extra-h: 560px;
-      --cam-extra-w: 560px;
+    /* tighter table on mobile */
+    .table-tight th, .table-tight td{
+      padding-top: .35rem;
+      padding-bottom: .35rem;
     }
     @media (max-width: 640px){
-      :root{
-        --cam-scale: 1.95;
-        --cam-top: -280px;
-        --cam-right: -340px;
-        --cam-extra-h: 760px;
-        --cam-extra-w: 760px;
+      .table-tight{font-size:.78rem}
+      .table-tight th, .table-tight td{
+        padding-top: .30rem;
+        padding-bottom: .30rem;
       }
-    }
-    .embed-crop {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-    }
-    .embed-iframe {
-      position: absolute;
-      top: var(--cam-top);
-      right: var(--cam-right);
-      width: calc(100% + var(--cam-extra-w));
-      height: calc(100% + var(--cam-extra-h));
-      border: 0;
-      transform: scale(var(--cam-scale));
-      transform-origin: top right;
-      background: #000;
     }
   </style>
 
@@ -192,267 +146,213 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <div class="flex gap-1 bg-slate-800/50 rounded-full p-1">
-          <button onclick="showView('dashboard')" id="nav-dashboard"
-            class="px-4 py-2 rounded-full text-sm font-medium transition-all bg-cyan-600/30 text-cyan-300">
-            חוף תל אביב
-          </button>
-          <button onclick="showView('history')" id="nav-history"
-            class="px-4 py-2 rounded-full text-sm font-medium transition-all hover:bg-white/5">
-            היסטוריה
-          </button>
-        </div>
+        <button onclick="fetchLiveData()" class="px-4 py-2 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 text-sm transition-colors flex items-center gap-2">
+          <i class="fas fa-sync" id="refreshIcon"></i>
+          רענון
+        </button>
       </div>
     </div>
   </nav>
 
-  <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto min-h-screen">
+  <main class="pt-24 pb-12 px-4 max-w-7xl mx-auto min-h-screen space-y-6">
 
-    <div id="dashboardView" class="space-y-6">
-
-      <div class="flex justify-between items-center glass-card rounded-xl p-4">
-        <div class="flex items-center gap-4">
-          <div class="live-indicator text-sm">
-            <span class="live-dot"></span>
-            <span>מדידות LIVE מהשטח</span>
-          </div>
-          <span class="text-gray-500">|</span>
-          <span class="text-xs text-gray-400">
-            שעון: <span id="israelTime" class="text-cyan-300 font-mono">--:--:--</span>
-          </span>
+    <!-- Status bar -->
+    <div class="flex justify-between items-center glass-card rounded-xl p-4">
+      <div class="flex items-center gap-4">
+        <div class="live-indicator text-sm">
+          <span class="live-dot"></span>
+          <span>מדידות LIVE מהשטח</span>
         </div>
-        <button onclick="fetchLiveData()"
-          class="px-4 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 text-sm transition-colors flex items-center gap-2">
-          <i class="fas fa-sync" id="refreshIcon"></i>
-          רענון מיידי
-        </button>
+        <span class="text-gray-500">|</span>
+        <span class="text-xs text-gray-400">
+          שעון: <span id="israelTime" class="text-cyan-300 font-mono">--:--:--</span>
+        </span>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <div class="glass-card rounded-3xl p-6 md:col-span-2">
-          <div class="flex justify-between items-start mb-6">
-            <div>
-              <p class="text-cyan-300 text-sm font-semibold mb-1">מהירות רוח ממוצעת</p>
-              <div class="flex items-baseline gap-2">
-                <span id="currentSpeed" class="text-7xl font-bold text-white tracking-tighter">--</span>
-                <span class="text-2xl text-cyan-400 font-medium">קשר</span>
-              </div>
-              <p class="text-xs text-gray-500 mt-1">המרה: m/s × 1.94</p>
-            </div>
-
-            <div class="compass-ring w-32 h-32 flex items-center justify-center relative">
-              <div class="compass-inner w-full h-full flex items-center justify-center relative">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <span class="text-xs text-gray-500 absolute top-2">N</span>
-                  <span class="text-xs text-gray-500 absolute bottom-2">S</span>
-                  <span class="text-xs text-gray-500 absolute left-2">W</span>
-                  <span class="text-xs text-gray-500 absolute right-2">E</span>
-                </div>
-                <div id="compassArrow"
-                  class="w-1 h-12 bg-gradient-to-t from-orange-500 to-yellow-400 rounded-full origin-bottom relative transition-transform duration-1000"
-                  style="transform: rotate(0deg);">
-                  <div
-                    class="absolute -top-1 -left-1.5 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[8px] border-b-orange-500">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">כיוון</p>
-              <p id="windDir" class="text-xl font-bold">--</p>
-            </div>
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">משבים</p>
-              <p id="windGust" class="text-xl font-bold text-orange-400">--</p>
-            </div>
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">טמפ' מים</p>
-              <p id="waterTempMain" class="text-xl font-bold text-teal-400">--</p>
-            </div>
-            <div class="text-center">
-              <p class="text-xs text-gray-400 mb-1">טמפ' חוף</p>
-              <p id="temp" class="text-xl font-bold">--</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <div class="wave-card rounded-2xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-water text-yellow-400 text-xl"></i>
-                <h4 class="font-bold text-yellow-100">גובה גל</h4>
-              </div>
-              <span class="text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">מודל</span>
-            </div>
-            <div class="flex items-end gap-2 mb-2">
-              <span id="waveHeight" class="text-4xl font-bold text-yellow-300">--</span>
-              <span class="text-sm text-yellow-200/70 mb-1">מטר</span>
-            </div>
-            <p class="text-xs text-yellow-200/60">מיקום: בת ים / הרצליה • נתון משוער</p>
-          </div>
-
-          <div class="glass-card rounded-2xl p-4">
-            <div class="flex items-center gap-3 mb-2">
-              <i class="fas fa-thermometer-three-quarters text-teal-400 text-xl"></i>
-              <div>
-                <p class="text-xs text-gray-400">טמפרטורת מים</p>
-                <p id="waterTempSide" class="text-3xl font-bold text-teal-300">--</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card rounded-2xl p-4 border-r-4 border-cyan-400">
-            <h4 class="font-bold mb-2">הילטון <span class="text-xs text-gray-500 font-normal">(צפון)</span></h4>
-            <div class="flex items-end gap-2">
-              <span id="speed1" class="text-2xl font-bold text-cyan-300">--</span>
-              <span class="text-sm text-gray-400 mb-1">קשר</span>
-            </div>
-          </div>
-
-          <div class="glass-card rounded-2xl p-4 border-r-4 border-blue-400">
-            <h4 class="font-bold mb-2">צ'רלס קלור <span class="text-xs text-gray-500 font-normal">(מרכז)</span></h4>
-            <div class="flex items-end gap-2">
-              <span id="speed2" class="text-2xl font-bold text-cyan-300">--</span>
-              <span class="text-sm text-gray-400 mb-1">קשר</span>
-            </div>
-          </div>
-
-          <div class="glass-card rounded-2xl p-4 border-r-4 border-purple-400">
-            <h4 class="font-bold mb-2">יפו <span class="text-xs text-gray-500 font-normal">(דרום)</span></h4>
-            <div class="flex items-end gap-2">
-              <span id="speed3" class="text-2xl font-bold text-cyan-300">--</span>
-              <span class="text-sm text-gray-400 mb-1">קשר</span>
-            </div>
-          </div>
-        </div>
+      <div class="text-xs text-gray-500">
+        עדכון כל דקה
       </div>
-
-      <div class="glass-card rounded-2xl p-6 mt-6">
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-3">
-            <i class="fas fa-video text-blue-400 text-xl"></i>
-            <div>
-              <h3 class="text-xl font-bold">שידור חי - חוף תל אביב</h3>
-              <p class="text-sm text-gray-400">ווידאו חי</p>
-            </div>
-          </div>
-          <a href="https://www.wavehub.co.il/stream/ma-aravi" class="link-pill px-4 py-2 rounded-lg text-sm text-blue-300 hover:bg-blue-500/30 transition-colors flex items-center gap-2">
-            <i class="fas fa-external-link-alt"></i>
-            פתח בחלון חדש
-          </a>
-        </div>
-
-        <div class="camera-frame aspect-video bg-black relative">
-          <div class="embed-crop">
-            <iframe
-              id="beachCamera"
-              class="embed-iframe"
-              src="https://www.wavehub.co.il/stream/ma-aravi"
-              allow="autoplay; fullscreen"
-              allowfullscreen
-              title="שידור חי - חוף תל אביב"
-            ></iframe>
-          </div>
-        </div>
-
-        <div class="mt-4 flex items-center gap-4 text-xs text-gray-500">
-          <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-red-400"></i> מיקום: תל אביב</span>
-          <span class="flex items-center gap-1"><i class="fas fa-broadcast-tower text-green-400"></i> סטטוס: שידור חי</span>
-        </div>
-      </div>
-
     </div>
 
-    <div id="historyView" class="hidden space-y-6">
+    <!-- Dashboard + Side cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <div class="glass-card rounded-2xl p-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <!-- Main -->
+      <div class="glass-card rounded-3xl p-6 md:col-span-2">
+        <div class="flex justify-between items-start mb-6">
           <div>
-            <h2 class="text-2xl font-bold mb-1">היסטוריית רוח 24 שעות</h2>
-            <div class="flex items-center gap-2">
-              <p class="text-sm text-gray-400">נתונים בזמן IST</p>
-              <span class="timezone-badge">UTC+2</span>
+            <p class="text-cyan-300 text-sm font-semibold mb-1">מהירות רוח ממוצעת</p>
+            <div class="flex items-baseline gap-2">
+              <span id="currentSpeed" class="text-7xl font-bold text-white tracking-tighter">--</span>
+              <span class="text-2xl text-cyan-400 font-medium">קשר</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">המרה: m/s × 1.94</p>
+          </div>
+
+          <div class="compass-ring w-32 h-32 flex items-center justify-center relative">
+            <div class="compass-inner w-full h-full flex items-center justify-center relative">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-xs text-gray-500 absolute top-2">N</span>
+                <span class="text-xs text-gray-500 absolute bottom-2">S</span>
+                <span class="text-xs text-gray-500 absolute left-2">W</span>
+                <span class="text-xs text-gray-500 absolute right-2">E</span>
+              </div>
+              <div id="compassArrow"
+                class="w-1 h-12 bg-gradient-to-t from-orange-500 to-yellow-400 rounded-full origin-bottom relative transition-transform duration-1000"
+                style="transform: rotate(0deg);">
+                <div class="absolute -top-1 -left-1.5 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[8px] border-b-orange-500"></div>
+              </div>
             </div>
           </div>
-
-          <div class="flex gap-2 bg-slate-800/50 p-1 rounded-lg">
-            <button onclick="setIntervalMode('1min')" id="btn-1min" class="interval-btn active px-4 py-2 rounded-md text-sm font-medium border border-transparent">
-              כל דקה
-            </button>
-            <button onclick="setIntervalMode('15min')" id="btn-15min" class="interval-btn px-4 py-2 rounded-md text-sm font-medium border border-transparent">
-              רבע שעה
-            </button>
-          </div>
         </div>
 
-        <div class="flex gap-4 mb-4 text-xs justify-center flex-wrap">
-          <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-gray-400"></div> &lt;10 קשר</div>
-          <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-green-500"></div> 10-15</div>
-          <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-blue-500"></div> 15-20</div>
-          <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-amber-500"></div> 20-25</div>
-          <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-red-500"></div> &gt;25</div>
-        </div>
-
-        <div class="history-container mb-8" id="historyChart">
-          <div class="absolute inset-0 flex items-center justify-center text-gray-500">
-            טוען נתונים...
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
+          <div class="text-center">
+            <p class="text-xs text-gray-400 mb-1">כיוון</p>
+            <p id="windDir" class="text-xl font-bold">--</p>
           </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="glass-card rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">ממוצע 24 שעות</p>
-            <p id="avg24" class="text-2xl font-bold text-cyan-300">--</p>
-            <p class="text-xs text-gray-500">קשר</p>
+          <div class="text-center">
+            <p class="text-xs text-gray-400 mb-1">משבים</p>
+            <p id="windGust" class="text-xl font-bold text-orange-400">--</p>
           </div>
-          <div class="glass-card rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">משב מקסימלי</p>
-            <p id="maxGust24" class="text-2xl font-bold text-orange-400">--</p>
-            <p class="text-xs text-gray-500">קשר</p>
+          <div class="text-center">
+            <p class="text-xs text-gray-400 mb-1">טמפ' מים</p>
+            <p id="waterTempMain" class="text-xl font-bold text-teal-400">--</p>
           </div>
-          <div class="glass-card rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">שעות גלישה (&gt;15)</p>
-            <p id="rideableHours" class="text-2xl font-bold text-green-400">--</p>
-            <p class="text-xs text-gray-500">שעות</p>
-          </div>
-          <div class="glass-card rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">כיוון דומיננטי</p>
-            <p id="dominantDir" class="text-2xl font-bold text-blue-300">--</p>
-            <p class="text-xs text-gray-500">ממוצע</p>
+          <div class="text-center">
+            <p class="text-xs text-gray-400 mb-1">טמפ' חוף</p>
+            <p id="temp" class="text-xl font-bold">--</p>
           </div>
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold">פרטים אחרונים</h3>
-          <span class="timezone-badge">IST</span>
+      <!-- Side -->
+      <div class="space-y-4">
+        <div class="wave-card rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-water text-yellow-400 text-xl"></i>
+              <h4 class="font-bold text-yellow-100">גובה גל</h4>
+            </div>
+            <span class="text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">מודל</span>
+          </div>
+          <div class="flex items-end gap-2 mb-2">
+            <span id="waveHeight" class="text-4xl font-bold text-yellow-300">--</span>
+            <span class="text-sm text-yellow-200/70 mb-1">מטר</span>
+          </div>
+          <p class="text-xs text-yellow-200/60">מיקום: בת ים / הרצליה • נתון משוער</p>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-right text-sm">
-            <thead class="border-b border-white/10 text-gray-400">
-              <tr>
-                <th class="pb-2 pl-4">שעה</th>
-                <th class="pb-2 pl-4">רוח</th>
-                <th class="pb-2 pl-4">משבים</th>
-                <th class="pb-2 pl-4">כיוון</th>
-                <th class="pb-2 pl-4">גל</th>
-                <th class="pb-2 pl-4">מים</th>
-              </tr>
-            </thead>
-            <tbody id="recentHoursTable">
-              <tr><td colspan="6" class="text-center py-8 text-gray-500">אין נתונים</td></tr>
-            </tbody>
-          </table>
+        <div class="glass-card rounded-2xl p-4">
+          <div class="flex items-center gap-3 mb-2">
+            <i class="fas fa-thermometer-three-quarters text-teal-400 text-xl"></i>
+            <div>
+              <p class="text-xs text-gray-400">טמפרטורת מים</p>
+              <p id="waterTempSide" class="text-3xl font-bold text-teal-300">--</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border-r-4 border-cyan-400">
+          <h4 class="font-bold mb-2">הילטון <span class="text-xs text-gray-500 font-normal">(צפון)</span></h4>
+          <div class="flex items-end gap-2">
+            <span id="speed1" class="text-2xl font-bold text-cyan-300">--</span>
+            <span class="text-sm text-gray-400 mb-1">קשר</span>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border-r-4 border-blue-400">
+          <h4 class="font-bold mb-2">צ'רלס קלור <span class="text-xs text-gray-500 font-normal">(מרכז)</span></h4>
+          <div class="flex items-end gap-2">
+            <span id="speed2" class="text-2xl font-bold text-cyan-300">--</span>
+            <span class="text-sm text-gray-400 mb-1">קשר</span>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border-r-4 border-purple-400">
+          <h4 class="font-bold mb-2">יפו <span class="text-xs text-gray-500 font-normal">(דרום)</span></h4>
+          <div class="flex items-end gap-2">
+            <span id="speed3" class="text-2xl font-bold text-cyan-300">--</span>
+            <span class="text-sm text-gray-400 mb-1">קשר</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History block (same page) -->
+    <div class="glass-card rounded-2xl p-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
+        <div>
+          <h2 class="text-2xl font-bold mb-1">היסטוריית רוח 24 שעות</h2>
+          <div class="flex items-center gap-2">
+            <p class="text-sm text-gray-400">נתונים בזמן IST</p>
+            <span class="timezone-badge">UTC+2</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2 bg-slate-800/50 p-1 rounded-lg">
+          <button onclick="setIntervalMode('1min')" id="btn-1min"
+            class="interval-btn active px-4 py-2 rounded-md text-sm font-medium border border-transparent">
+            כל דקה
+          </button>
+          <button onclick="setIntervalMode('15min')" id="btn-15min"
+            class="interval-btn px-4 py-2 rounded-md text-sm font-medium border border-transparent">
+            רבע שעה
+          </button>
         </div>
       </div>
 
+      <div class="flex gap-4 mb-4 text-xs justify-center flex-wrap">
+        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-gray-400"></div> &lt;10 קשר</div>
+        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-green-500"></div> 10-15</div>
+        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-blue-500"></div> 15-20</div>
+        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-amber-500"></div> 20-25</div>
+        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded bg-red-500"></div> &gt;25</div>
+      </div>
+
+      <div class="history-container mb-8" id="historyChart">
+        <div class="absolute inset-0 flex items-center justify-center text-gray-500">טוען נתונים...</div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card rounded-xl p-4 text-center">
+          <p class="text-xs text-gray-400 mb-1">ממוצע 24 שעות</p>
+          <p id="avg24" class="text-2xl font-bold text-cyan-300">--</p>
+          <p class="text-xs text-gray-500">קשר</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <p class="text-xs text-gray-400 mb-1">משב מקסימלי</p>
+          <p id="maxGust24" class="text-2xl font-bold text-orange-400">--</p>
+          <p class="text-xs text-gray-500">קשר</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <p class="text-xs text-gray-400 mb-1">שעות גלישה (&gt;15)</p>
+          <p id="rideableHours" class="text-2xl font-bold text-green-400">--</p>
+          <p class="text-xs text-gray-500">שעות</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <p class="text-xs text-gray-400 mb-1">כיוון דומיננטי</p>
+          <p id="dominantDir" class="text-2xl font-bold text-blue-300">--</p>
+          <p class="text-xs text-gray-500">ממוצע</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-right table-tight">
+          <thead class="border-b border-white/10 text-gray-400">
+            <tr>
+              <th class="pb-2 pl-2 whitespace-nowrap">שעה</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">רוח</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">משבים</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">כיוון</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">גל</th>
+              <th class="pb-2 pl-2 whitespace-nowrap">מים</th>
+            </tr>
+          </thead>
+          <tbody id="recentHoursTable">
+            <tr><td colspan="6" class="text-center py-6 text-gray-500">אין נתונים</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </main>
@@ -462,10 +362,7 @@
     const KNOTS = 1.94384;
     const ISRAEL_TZ = 'Asia/Jerusalem';
 
-    const WAVE_COORDS = {
-      herzliya: { lat: 32.1656, lon: 34.8368 },
-      batyam: { lat: 32.0167, lon: 34.7500 }
-    };
+    const WAVE_COORDS = { lat: 32.1656, lon: 34.8368 };
 
     const windSensors = [
       { id: 1, lat: 32.1101, lon: 34.7795, name: 'הילטון' },
@@ -478,9 +375,9 @@
       currentInterval: '1min'
     };
 
-    function msToKnots(ms) { return (ms * KNOTS).toFixed(1); }
+    function msToKnots(ms){ return (ms * KNOTS).toFixed(1); }
 
-    function getWindClass(knots) {
+    function getWindClass(knots){
       if (knots < 10) return 'wind-weak';
       if (knots < 15) return 'wind-light';
       if (knots < 20) return 'wind-good';
@@ -488,12 +385,12 @@
       return 'wind-extreme';
     }
 
-    function getDir(deg) {
-      const dirs = ['צפון', 'צפון-מזרח', 'מזרח', 'דרום-מזרח', 'דרום', 'דרום-מערב', 'מערב', 'צפון-מערב'];
+    function getDir(deg){
+      const dirs = ['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
       return dirs[Math.round(deg / 45) % 8];
     }
 
-    function formatIsraelTime(date) {
+    function formatIsraelTime(date){
       return date.toLocaleTimeString('he-IL', {
         timeZone: ISRAEL_TZ,
         hour: '2-digit',
@@ -508,27 +405,14 @@
       if (el) el.textContent = formatIsraelTime(new Date());
     }, 1000);
 
-    function showView(view) {
-      document.getElementById('dashboardView').classList.add('hidden');
-      document.getElementById('historyView').classList.add('hidden');
-
-      document.getElementById('nav-dashboard').classList.remove('bg-cyan-600/30', 'text-cyan-300');
-      document.getElementById('nav-history').classList.remove('bg-cyan-600/30', 'text-cyan-300');
-
-      document.getElementById(view + 'View').classList.remove('hidden');
-      document.getElementById('nav-' + view).classList.add('bg-cyan-600/30', 'text-cyan-300');
-
-      if (view === 'history') renderHistory();
-    }
-
-    function setIntervalMode(mode) {
+    function setIntervalMode(mode){
       state.currentInterval = mode;
       document.getElementById('btn-1min').classList.toggle('active', mode === '1min');
       document.getElementById('btn-15min').classList.toggle('active', mode === '15min');
       renderHistory();
     }
 
-    async function fetchLiveData() {
+    async function fetchLiveData(){
       const refreshIcon = document.getElementById('refreshIcon');
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
@@ -543,7 +427,9 @@
           }))
       );
 
-      const wavePromise = fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.herzliya.lat}&longitude=${WAVE_COORDS.herzliya.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`)
+      const wavePromise = fetch(
+        `https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.lat}&longitude=${WAVE_COORDS.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`
+      )
         .then(r => r.json())
         .then(data => ({
           wave: data.current?.wave_height ?? 0.6,
@@ -553,9 +439,9 @@
 
       const [windResults, waveResult] = await Promise.all([Promise.all(windPromises), wavePromise]);
 
-      const avgSpeed = windResults.reduce((a, b) => a + b.speed, 0) / windResults.length;
-      const avgDeg   = windResults.reduce((a, b) => a + b.deg, 0) / windResults.length;
-      const avgGust  = windResults.reduce((a, b) => a + b.gust, 0) / windResults.length;
+      const avgSpeed = windResults.reduce((a,b) => a + b.speed, 0) / windResults.length;
+      const avgDeg   = windResults.reduce((a,b) => a + b.deg, 0) / windResults.length;
+      const avgGust  = windResults.reduce((a,b) => a + b.gust, 0) / windResults.length;
 
       const reading = {
         timestamp: new Date(),
@@ -582,40 +468,36 @@
 
       setText('waterTempMain', (waveResult.waterTemp ?? 23).toFixed(0) + '°C');
       setText('waterTempSide', (waveResult.waterTemp ?? 23).toFixed(0) + '°C');
-
       setText('waveHeight', (waveResult.wave ?? 0.6).toFixed(1));
 
-      windResults.forEach((data, idx) => {
-        setText(`speed${idx + 1}`, msToKnots(data.speed));
-      });
+      windResults.forEach((data, idx) => setText(`speed${idx+1}`, msToKnots(data.speed)));
 
       if (refreshIcon) refreshIcon.classList.remove('fa-spin');
 
-      const historyVisible = !document.getElementById('historyView').classList.contains('hidden');
-      if (historyVisible) renderHistory();
+      renderHistory();
     }
 
-    function aggregateEvery15(readings) {
+    function aggregateEvery15(readings){
       const out = [];
-      for (let i = 0; i < readings.length; i += 15) {
+      for (let i = 0; i < readings.length; i += 15){
         const chunk = readings.slice(i, i + 15);
         if (!chunk.length) continue;
         out.push({
-          timestamp: chunk[Math.floor(chunk.length / 2)].timestamp,
-          speed: chunk.reduce((a, b) => a + b.speed, 0) / chunk.length,
-          deg: chunk.reduce((a, b) => a + b.deg, 0) / chunk.length,
-          gust: chunk.reduce((a, b) => a + b.gust, 0) / chunk.length,
-          wave: chunk.reduce((a, b) => a + b.wave, 0) / chunk.length,
-          waterTemp: chunk.reduce((a, b) => a + b.waterTemp, 0) / chunk.length
+          timestamp: chunk[Math.floor(chunk.length/2)].timestamp,
+          speed: chunk.reduce((a,b) => a + b.speed, 0) / chunk.length,
+          deg: chunk.reduce((a,b) => a + b.deg, 0) / chunk.length,
+          gust: chunk.reduce((a,b) => a + b.gust, 0) / chunk.length,
+          wave: chunk.reduce((a,b) => a + b.wave, 0) / chunk.length,
+          waterTemp: chunk.reduce((a,b) => a + b.waterTemp, 0) / chunk.length
         });
       }
       return out;
     }
 
-    function renderHistory() {
+    function renderHistory(){
       if (state.readings.length === 0) return;
 
-      const last24h = state.readings.filter(r => (new Date() - r.timestamp) / (1000 * 60 * 60) <= 24);
+      const last24h = state.readings.filter(r => (new Date() - r.timestamp) / (1000*60*60) <= 24);
       let dataToShow = (state.currentInterval === '15min') ? aggregateEvery15(last24h) : last24h;
       if (dataToShow.length === 0) return;
 
@@ -637,16 +519,14 @@
         bar.style.left = `${left}px`;
         bar.style.width = `${Math.max(2, barWidth - (state.currentInterval === '1min' ? 0 : 1))}px`;
 
-        const timeStr = point.timestamp.toLocaleTimeString('he-IL', {
-          timeZone: ISRAEL_TZ, hour: '2-digit', minute: '2-digit', hour12: false
-        });
+        const timeStr = point.timestamp.toLocaleTimeString('he-IL', { timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false });
         bar.title = `${knots.toFixed(1)} קשר • ${getDir(point.deg)} • ${timeStr}`;
 
         const arrowInterval = (state.currentInterval === '1min') ? 30 : 2;
         if (index % arrowInterval === 0) {
           const arrow = document.createElement('div');
           arrow.className = 'direction-arrow';
-          arrow.style.left = `${left + barWidth / 2}px`;
+          arrow.style.left = `${left + barWidth/2}px`;
           arrow.innerHTML = `<i class="fas fa-arrow-up" style="transform: rotate(${point.deg}deg)"></i>`;
           container.appendChild(arrow);
         }
@@ -664,9 +544,9 @@
       });
 
       const speeds = dataToShow.map(d => d.speed * KNOTS);
-      const avg = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+      const avg = speeds.reduce((a,b) => a+b, 0) / speeds.length;
       const rideable = dataToShow.filter(d => (d.speed * KNOTS) >= 15).length * (state.currentInterval === '1min' ? 1/60 : 0.25);
-      const avgDeg = dataToShow.reduce((a, b) => a + b.deg, 0) / dataToShow.length;
+      const avgDeg = dataToShow.reduce((a,b) => a + b.deg, 0) / dataToShow.length;
 
       const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
       setText('avg24', avg.toFixed(1));
@@ -678,17 +558,15 @@
       const recentData = dataToShow.slice(-20).reverse();
 
       table.innerHTML = recentData.map(point => {
-        const timeStr = point.timestamp.toLocaleTimeString('he-IL', {
-          timeZone: ISRAEL_TZ, hour: '2-digit', minute: '2-digit', hour12: false
-        });
+        const timeStr = point.timestamp.toLocaleTimeString('he-IL', { timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false });
         return `
           <tr class="border-b border-white/5 hover:bg-white/5">
-            <td class="py-2 pl-4 font-mono">${timeStr}</td>
-            <td class="py-2 pl-4 font-bold">${msToKnots(point.speed)}</td>
-            <td class="py-2 pl-4 text-orange-400">${msToKnots(point.gust)}</td>
-            <td class="py-2 pl-4">${getDir(point.deg)}</td>
-            <td class="py-2 pl-4 text-yellow-400">${(point.wave ?? 0).toFixed(1)}מ'</td>
-            <td class="py-2 pl-4 text-teal-400">${(point.waterTemp ?? 0).toFixed(0)}°</td>
+            <td class="pl-2 whitespace-nowrap font-mono">${timeStr}</td>
+            <td class="pl-2 font-bold">${msToKnots(point.speed)}</td>
+            <td class="pl-2 text-orange-400">${msToKnots(point.gust)}</td>
+            <td class="pl-2 whitespace-nowrap">${getDir(point.deg)}</td>
+            <td class="pl-2 text-yellow-400 whitespace-nowrap">${(point.wave ?? 0).toFixed(1)}מ'</td>
+            <td class="pl-2 text-teal-400 whitespace-nowrap">${(point.waterTemp ?? 0).toFixed(0)}°</td>
           </tr>
         `;
       }).join('');
@@ -698,8 +576,7 @@
     setInterval(fetchLiveData, 60000);
 
     window.addEventListener('resize', () => {
-      const historyVisible = !document.getElementById('historyView').classList.contains('hidden');
-      if (historyVisible) renderHistory();
+      renderHistory();
     });
   </script>
 </body>
