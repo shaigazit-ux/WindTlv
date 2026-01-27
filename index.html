@@ -1,245 +1,755 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>תל אביב קייט | מדידות חוף</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>תל אביב קייט | מדידות חוף</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-<style>
-*{font-family:'Assistant',sans-serif}
-:root{
-  --bg:#eaf6ff;
-  --card:#fff;
-  --text:#0f172a;
-  --muted:#475569;
-  --border:#cbd5e1;
-  --brand:#0284c7;
-  --accent:#0ea5e9;
-}
-body{
-  background:linear-gradient(#f0f9ff,#e0f2fe);
-  color:var(--text);
-}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:0 10px 30px rgba(2,132,199,.1);
-}
-.badge{
-  font-size:.7rem;
-  background:#e0f2fe;
-  color:var(--brand);
-  padding:.2rem .6rem;
-  border-radius:999px;
-}
-.chart-shell{
-  background:#f8fafc;
-  border:1px solid var(--border);
-  border-radius:14px;
-  height:260px;
-  padding:10px;
-}
-.table-tight th,.table-tight td{
-  padding:.3rem .4rem;
-  font-size:.8rem;
-}
-</style>
+  <style>
+    * { font-family: 'Assistant', sans-serif; }
+
+    :root{
+      --bg1:#f0f9ff;
+      --bg2:#e0f2fe;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --border:#cbd5e1;
+      --brand:#0284c7;
+      --brand2:#0ea5e9;
+      --wind:#0369a1;
+    }
+
+    body{
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(2,132,199,.10);
+    }
+
+    .badge{
+      font-size:.72rem;
+      background:#e0f2fe;
+      color: var(--brand);
+      padding:.18rem .55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(2,132,199,.22);
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      white-space: nowrap;
+    }
+
+    .btn{
+      background: rgba(2,132,199,.12);
+      border: 1px solid rgba(2,132,199,.22);
+      color: var(--brand);
+      padding: .45rem .7rem;
+      border-radius: 12px;
+      transition: .2s;
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      font-weight: 800;
+      font-size: .9rem;
+    }
+    .btn:hover{ background: rgba(2,132,199,.18); }
+    .btn:active{ transform: translateY(1px); }
+
+    /* ===== Compass (clean, sun-readable) ===== */
+    .compass{
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #f8fafc;
+      position: relative;
+      box-shadow: inset 0 0 0 10px rgba(14,165,233,.08);
+    }
+    .compass::after{
+      content:"";
+      position:absolute;
+      inset:14px;
+      border-radius:50%;
+      border:1px dashed #94a3b8;
+    }
+    .compass-degree{
+      position:absolute;
+      font-size:.68rem;
+      color:#64748b;
+      font-weight:800;
+      background: rgba(255,255,255,.88);
+      border:1px solid rgba(203,213,225,.8);
+      padding:.05rem .28rem;
+      border-radius: 8px;
+    }
+    .deg-n{top:6px;left:50%;transform:translateX(-50%)}
+    .deg-e{right:6px;top:50%;transform:translateY(-50%)}
+    .deg-s{bottom:6px;left:50%;transform:translateX(-50%)}
+    .deg-w{left:6px;top:50%;transform:translateY(-50%)}
+
+    .compass-arrow{
+      position:absolute;
+      bottom:50%;
+      left:50%;
+      width: 5px;
+      height: 54px;
+      border-radius: 999px;
+      background: linear-gradient(to top,var(--brand2),var(--brand));
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(0deg);
+      box-shadow: 0 6px 12px rgba(2,132,199,.22);
+    }
+    .compass-arrow::after{
+      content:"";
+      position:absolute;
+      top:-10px;
+      left:50%;
+      transform: translateX(-50%);
+      border-left:9px solid transparent;
+      border-right:9px solid transparent;
+      border-bottom:12px solid var(--brand);
+    }
+
+    /* ===== Interval buttons ===== */
+    .seg{
+      background: rgba(148,163,184,.20);
+      border: 1px solid rgba(148,163,184,.35);
+      border-radius: 999px;
+      padding: .2rem;
+      display:inline-flex;
+      gap:.25rem;
+    }
+    .seg button{
+      padding:.38rem .7rem;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: .85rem;
+      color: #334155;
+      transition:.15s;
+      border:1px solid transparent;
+    }
+    .seg button.active{
+      background: #ffffff;
+      border-color: rgba(2,132,199,.25);
+      color: var(--brand);
+      box-shadow: 0 6px 16px rgba(2,132,199,.12);
+    }
+
+    /* ===== Chart container ===== */
+    .chart-shell{
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      height: 280px;
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,.02);
+    }
+    @media(max-width:640px){
+      .chart-shell{ height: 240px; }
+    }
+
+    /* ===== Tight table (mobile friendly) ===== */
+    .table-tight th, .table-tight td{
+      padding: .28rem .42rem;
+      font-size: .82rem;
+      vertical-align: middle;
+    }
+    @media (max-width: 640px){
+      .table-tight th, .table-tight td{ font-size: .72rem; padding: .25rem .34rem; }
+    }
+
+    .mini-pill{
+      border:1px solid rgba(2,132,199,.20);
+      background: rgba(2,132,199,.08);
+      color:#0b5b88;
+      border-radius: 999px;
+      padding:.2rem .55rem;
+      font-size: .78rem;
+      font-weight: 800;
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 
 <body class="px-4 py-6">
-<header class="max-w-6xl mx-auto mb-4 flex justify-between items-center">
-  <div>
-    <h1 class="text-2xl font-extrabold">תל אביב קייט</h1>
-    <p class="text-sm text-slate-500">ממוצע משוקלל • חיישנים חיים</p>
-  </div>
-  <span class="badge">LIVE</span>
-</header>
+  <header class="max-w-6xl mx-auto mb-5 flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight">תל אביב קייט</h1>
+      <div class="flex items-center gap-2 mt-1 flex-wrap">
+        <span class="badge"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>LIVE</span>
+        <span class="text-sm text-slate-500">שעון: <span id="israelTime" class="font-mono text-slate-700">--:--:--</span></span>
+        <span class="text-sm text-slate-400">• ממוצע משוקלל</span>
+      </div>
+    </div>
 
-<main class="max-w-6xl mx-auto space-y-6">
+    <button onclick="fetchLiveData()" class="btn">
+      <i class="fas fa-rotate" id="refreshIcon"></i>
+      רענון
+    </button>
+  </header>
 
-<div class="card p-6">
-  <h2 class="font-bold mb-2">גרף רוח – 24 שעות</h2>
-  <div class="chart-shell">
-    <canvas id="windChart"></canvas>
-  </div>
-</div>
+  <main class="max-w-6xl mx-auto space-y-6">
 
-<div class="card p-6">
-  <h2 class="font-bold mb-2">חיישנים פעילים (20–30 ק״מ)</h2>
-  <ul class="text-sm text-slate-600 list-disc pr-5">
-    <li>OpenWeather – הילטון / קלור / יפו</li>
-    <li>Open-Meteo – הרצליה, בת ים, ראשל״צ</li>
-    <li>METAR – נתב״ג (LLBG)</li>
-  </ul>
-</div>
+    <!-- Dashboard -->
+    <section class="card p-5 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <p class="text-sm text-slate-500 mb-1">מהירות רוח ממוצעת</p>
+        <div class="flex items-end gap-3">
+          <span id="currentSpeed" class="text-6xl font-extrabold" style="color:var(--wind)">--</span>
+          <span class="text-xl mb-1 font-bold">קשר</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">המרה: m/s × 1.94</p>
 
-<div class="card p-6">
-  <h2 class="font-bold mb-3">נתונים אחרונים</h2>
-  <div class="overflow-x-auto">
-    <table class="w-full table-tight text-right">
-      <thead class="border-b text-slate-500">
-        <tr>
-          <th>שעה</th><th>רוח</th><th>משבים</th><th class="text-center">כיוון</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-center">
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">כיוון</p>
+            <p id="windDir" class="font-extrabold">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">משבים</p>
+            <p id="windGust" class="font-extrabold text-orange-600">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">מים</p>
+            <p id="waterTempMain" class="font-extrabold text-teal-700">--</p>
+          </div>
+          <div class="card !shadow-none p-3" style="border-radius:14px">
+            <p class="text-xs text-slate-500">חוף</p>
+            <p id="temp" class="font-extrabold">--</p>
+          </div>
+        </div>
 
-</main>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="mini-pill"><i class="fas fa-cloud"></i> OWM חוף</span>
+          <span class="mini-pill"><i class="fas fa-satellite"></i> Open-Meteo</span>
+          <span class="mini-pill"><i class="fas fa-plane"></i> נתב״ג METAR</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center">
+        <div class="compass" title="כיוון רוח (מעלות)">
+          <div class="compass-degree deg-n">0°</div>
+          <div class="compass-degree deg-e">90°</div>
+          <div class="compass-degree deg-s">180°</div>
+          <div class="compass-degree deg-w">270°</div>
+          <div id="compassArrow" class="compass-arrow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Side cards -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="card p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-extrabold">גובה גל</p>
+          <span class="badge">מודל</span>
+        </div>
+        <div class="mt-2 flex items-end gap-2">
+          <span id="waveHeight" class="text-4xl font-extrabold text-amber-600">--</span>
+          <span class="text-sm text-slate-500 mb-1">מ׳</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">אזור: בת ים / הרצליה</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">טמפרטורת מים</p>
+        <p id="waterTempSide" class="text-4xl font-extrabold text-teal-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">SST</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">הילטון <span class="text-xs text-slate-500 font-semibold">(צפון)</span></p>
+        <p id="speed1" class="text-4xl font-extrabold text-sky-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">קשר</p>
+      </div>
+
+      <div class="card p-4">
+        <p class="text-sm font-extrabold">צ'רלס קלור <span class="text-xs text-slate-500 font-semibold">(מרכז)</span></p>
+        <p id="speed2" class="text-4xl font-extrabold text-sky-700 mt-2">--</p>
+        <p class="text-xs text-slate-500 mt-2">קשר</p>
+        <p class="text-xs text-slate-400 mt-1">יפו בממוצע ובטבלה</p>
+      </div>
+    </section>
+
+    <!-- Extra sensors (compact) -->
+    <section class="card p-5 md:p-6">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h2 class="text-lg font-extrabold">חיישנים נוספים</h2>
+          <p class="text-sm text-slate-500">עד שיגיע טוקן לתחנות</p>
+        </div>
+        <span class="badge">LIVE</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="card !shadow-none p-4" style="border-radius:14px">
+          <p class="text-xs text-slate-500">הרצליה (OM)</p>
+          <p id="omHerzliya" class="text-2xl font-extrabold text-sky-800 mt-1">--</p>
+          <p class="text-xs text-slate-500">קשר</p>
+        </div>
+        <div class="card !shadow-none p-4" style="border-radius:14px">
+          <p class="text-xs text-slate-500">בת ים (OM)</p>
+          <p id="omBatYam" class="text-2xl font-extrabold text-sky-800 mt-1">--</p>
+          <p class="text-xs text-slate-500">קשר</p>
+        </div>
+        <div class="card !shadow-none p-4" style="border-radius:14px">
+          <p class="text-xs text-slate-500">ראשל״צ (OM)</p>
+          <p id="omRishon" class="text-2xl font-extrabold text-sky-800 mt-1">--</p>
+          <p class="text-xs text-slate-500">קשר</p>
+        </div>
+        <div class="card !shadow-none p-4" style="border-radius:14px">
+          <p class="text-xs text-slate-500">נתב״ג (LLBG)</p>
+          <p id="metarLLBG" class="text-2xl font-extrabold text-sky-800 mt-1">--</p>
+          <p class="text-xs text-slate-500">קשר</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="card p-5 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-lg font-extrabold">גרף רוח (24 שעות)</h2>
+          <p class="text-sm text-slate-500">רצועות צבע לפי עוצמה + מהירות/משבים</p>
+        </div>
+
+        <div class="seg">
+          <button id="btn-1min" class="active" onclick="setIntervalMode('1min')">כל דקה</button>
+          <button id="btn-15min" onclick="setIntervalMode('15min')">15 דקות</button>
+        </div>
+      </div>
+
+      <div class="chart-shell mb-6">
+        <canvas id="windChart" aria-label="Wind chart" role="img"></canvas>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-right table-tight">
+          <thead class="text-slate-500 border-b border-slate-200">
+            <tr>
+              <th class="whitespace-nowrap">שעה</th>
+              <th class="whitespace-nowrap">רוח</th>
+              <th class="whitespace-nowrap">משבים</th>
+              <th class="text-center whitespace-nowrap">כיוון</th>
+              <th class="whitespace-nowrap">גל</th>
+              <th class="whitespace-nowrap">מים</th>
+            </tr>
+          </thead>
+          <tbody id="recentHoursTable">
+            <tr><td colspan="6" class="text-center py-6 text-slate-400">אין נתונים</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
 
 <script>
-const KNOTS=1.94384;
-const state={readings:[]};
-let chart=null;
+  const OWM_API_KEY = '0429ca60a348cdac63a6cc4547a6837d';
+  const KNOTS = 1.94384;
+  const ISRAEL_TZ = 'Asia/Jerusalem';
 
-/* ===== Wind zones plugin ===== */
-const windZonesPlugin={
- id:'windZones',
- beforeDraw(chart){
-  const{ctx,chartArea,scales}=chart;
-  if(!chartArea)return;
-  const y=scales.y;
-  const zones=[
-   {f:0,t:10,c:'rgba(148,163,184,.18)'},
-   {f:10,t:15,c:'rgba(34,197,94,.14)'},
-   {f:15,t:20,c:'rgba(59,130,246,.14)'},
-   {f:20,t:25,c:'rgba(245,158,11,.14)'},
-   {f:25,t:60,c:'rgba(239,68,68,.12)'}
+  // Wave + SST point (marine)
+  const WAVE_COORDS = { lat: 32.1656, lon: 34.8368 };
+
+  // Base 3 coastal points (OWM)
+  const windSensorsOWM = [
+    { id: 1, lat: 32.1101, lon: 34.7795, name: 'הילטון' },
+    { id: 2, lat: 32.0631, lon: 34.7636, name: 'קלור' },
+    { id: 3, lat: 32.0500, lon: 34.7500, name: 'יפו' }
   ];
-  ctx.save();
-  ctx.rect(chartArea.left,chartArea.top,chartArea.right-chartArea.left,chartArea.bottom-chartArea.top);
-  ctx.clip();
-  zones.forEach(z=>{
-    ctx.fillStyle=z.c;
-    ctx.fillRect(chartArea.left,y.getPixelForValue(z.t),chartArea.right-chartArea.left,y.getPixelForValue(z.f)-y.getPixelForValue(z.t));
+
+  // Extra open sensors (Open-Meteo, no key)
+  const openMeteoPoints = {
+    herzliya: { lat: 32.1656, lon: 34.8368, label: 'הרצליה' },
+    batyam:   { lat: 32.0167, lon: 34.7500, label: 'בת ים' },
+    rishon:   { lat: 31.9870, lon: 34.7590, label: 'ראשל״צ' }
+  };
+
+  const state = {
+    readings: [],
+    currentInterval: '1min'
+  };
+
+  // ===== Chart.js: Wind zones plugin (knots) =====
+  const windZonesPlugin = {
+    id: 'windZones',
+    beforeDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      if (!chartArea) return;
+      const y = scales.y;
+      if (!y) return;
+
+      // zones: [from, to, rgba]
+      const zones = [
+        { from: 0,  to: 10, color: 'rgba(148,163,184,0.16)' },
+        { from: 10, to: 15, color: 'rgba(34,197,94,0.14)'  },
+        { from: 15, to: 20, color: 'rgba(59,130,246,0.13)' },
+        { from: 20, to: 25, color: 'rgba(245,158,11,0.13)' },
+        { from: 25, to: 60, color: 'rgba(239,68,68,0.11)'  }
+      ];
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+      ctx.clip();
+
+      zones.forEach(z => {
+        const yTop = y.getPixelForValue(z.to);
+        const yBottom = y.getPixelForValue(z.from);
+        ctx.fillStyle = z.color;
+        ctx.fillRect(chartArea.left, yTop, chartArea.right - chartArea.left, yBottom - yTop);
+      });
+
+      ctx.restore();
+    }
+  };
+
+  let windChartInstance = null;
+
+  function msToKnots(ms){ return (ms * KNOTS); }
+  function msToKnots1(ms){ return (ms * KNOTS).toFixed(1); }
+
+  function getDir(deg){
+    const dirs = ['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
+    return dirs[Math.round(deg / 45) % 8];
+  }
+
+  function formatIsraelTime(date){
+    return date.toLocaleTimeString('he-IL', {
+      timeZone: ISRAEL_TZ,
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    });
+  }
+
+  // vector mean for direction (degrees)
+  function meanDirectionDeg(degWeights){
+    // degWeights: [{deg, w}]
+    let x = 0, y = 0;
+    degWeights.forEach(({deg, w}) => {
+      const rad = deg * Math.PI / 180;
+      x += Math.cos(rad) * w;
+      y += Math.sin(rad) * w;
+    });
+    if (x === 0 && y === 0) return 0;
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  // Clock
+  setInterval(() => {
+    const el = document.getElementById('israelTime');
+    if (el) el.textContent = formatIsraelTime(new Date());
+  }, 1000);
+
+  function setIntervalMode(mode){
+    state.currentInterval = mode;
+    document.getElementById('btn-1min').classList.toggle('active', mode === '1min');
+    document.getElementById('btn-15min').classList.toggle('active', mode === '15min');
+    renderHistory();
+  }
+
+  function ensureChart(){
+    if (windChartInstance) return;
+
+    const ctx = document.getElementById('windChart');
+
+    windChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'רוח (קשר)',
+            data: [],
+            tension: 0.25,
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: true,
+            backgroundColor: (context) => {
+              const { chart } = context;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(2,132,199,0.10)';
+              const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              g.addColorStop(0, 'rgba(2,132,199,0.26)');
+              g.addColorStop(1, 'rgba(2,132,199,0.02)');
+              return g;
+            }
+          },
+          {
+            label: 'משבים (קשר)',
+            data: [],
+            tension: 0.25,
+            borderWidth: 2,
+            pointRadius: 0,
+            borderDash: [6,4],
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: true, labels: { boxWidth: 14, boxHeight: 2 } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { maxTicksLimit: 8 },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'קשר' },
+            grid: { color: 'rgba(15,23,42,0.08)' }
+          }
+        }
+      },
+      plugins: [windZonesPlugin]
+    });
+  }
+
+  function aggregateEvery15(readings){
+    const out = [];
+    for (let i = 0; i < readings.length; i += 15){
+      const chunk = readings.slice(i, i + 15);
+      if (!chunk.length) continue;
+
+      // average direction via vector mean inside chunk
+      const dirMean = meanDirectionDeg(chunk.map(r => ({ deg: r.deg, w: 1 })));
+
+      out.push({
+        timestamp: chunk[Math.floor(chunk.length/2)].timestamp,
+        speed: chunk.reduce((a,b)=>a + b.speed, 0) / chunk.length,
+        deg: dirMean,
+        gust: chunk.reduce((a,b)=>a + b.gust, 0) / chunk.length,
+        wave: chunk.reduce((a,b)=>a + (b.wave ?? 0), 0) / chunk.length,
+        waterTemp: chunk.reduce((a,b)=>a + (b.waterTemp ?? 0), 0) / chunk.length
+      });
+    }
+    return out;
+  }
+
+  async function fetchOpenMeteoPoint(lat, lon){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const c = j.current || {};
+    return {
+      speed: (c.wind_speed_10m ?? 0) / 3.6, // km/h -> m/s
+      deg: (c.wind_direction_10m ?? 0),
+      gust: ((c.wind_gusts_10m ?? c.wind_speed_10m ?? 0) / 3.6)
+    };
+  }
+
+  async function fetchMETAR_LLBG(){
+    // NOAA AviationWeather JSON
+    const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=LLBG&format=json`);
+    const arr = await r.json();
+    const m = arr && arr[0] ? arr[0] : null;
+    if (!m) return null;
+
+    // wspd/wgst are in knots; convert to m/s
+    const wspd = Number(m.wspd ?? 0);
+    const wgst = (m.wgst != null) ? Number(m.wgst) : null;
+    const wdir = Number(m.wdir ?? 0);
+
+    const knotsToMs = (k) => k * 0.514444;
+    return {
+      speed: knotsToMs(wspd),
+      gust: knotsToMs(wgst ?? wspd * 1.3),
+      deg: wdir
+    };
+  }
+
+  async function fetchLiveData(){
+    const refreshIcon = document.getElementById('refreshIcon');
+    if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+    // --- OWM coastal points ---
+    const owmPromises = windSensorsOWM.map(s =>
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${s.lat}&lon=${s.lon}&appid=${OWM_API_KEY}&units=metric&lang=he`)
+        .then(r => r.json())
+        .then(data => ({
+          speed: data.wind?.speed ?? 0,
+          deg: data.wind?.deg ?? 0,
+          gust: data.wind?.gust ?? ((data.wind?.speed ?? 0) * 1.2),
+          temp: data.main?.temp ?? 0
+        }))
+        .catch(() => ({ speed: 0, deg: 0, gust: 0, temp: 0 }))
+    );
+
+    // --- Waves & SST ---
+    const wavePromise = fetch(
+      `https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.lat}&longitude=${WAVE_COORDS.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`
+    )
+      .then(r => r.json())
+      .then(data => ({
+        wave: data.current?.wave_height ?? 0.6,
+        waterTemp: data.current?.sea_surface_temperature ?? 23
+      }))
+      .catch(() => ({ wave: 0.6, waterTemp: 23 }));
+
+    // --- Open-Meteo points ---
+    const omPromises = [
+      fetchOpenMeteoPoint(openMeteoPoints.herzliya.lat, openMeteoPoints.herzliya.lon),
+      fetchOpenMeteoPoint(openMeteoPoints.batyam.lat, openMeteoPoints.batyam.lon),
+      fetchOpenMeteoPoint(openMeteoPoints.rishon.lat, openMeteoPoints.rishon.lon),
+    ].map(p => p.catch(() => ({ speed: 0, deg: 0, gust: 0 })));
+
+    // --- METAR LLBG ---
+    const metarPromise = fetchMETAR_LLBG().catch(() => null);
+
+    const [owmResults, waveResult, omResults, metar] = await Promise.all([
+      Promise.all(owmPromises),
+      wavePromise,
+      Promise.all(omPromises),
+      metarPromise
+    ]);
+
+    // Update per-coast sensors cards
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    setText('speed1', msToKnots1(owmResults[0]?.speed ?? 0));
+    setText('speed2', msToKnots1(owmResults[1]?.speed ?? 0));
+
+    // Extra sensors cards (knots)
+    setText('omHerzliya', msToKnots1(omResults[0]?.speed ?? 0));
+    setText('omBatYam',   msToKnots1(omResults[1]?.speed ?? 0));
+    setText('omRishon',   msToKnots1(omResults[2]?.speed ?? 0));
+    setText('metarLLBG',  metar ? (msToKnots1(metar.speed)) : '--');
+
+    // Weighted blend
+    // Weights are tuned so: coastal OWM dominates, Open-Meteo supports, METAR small but stabilizes.
+    const parts = [];
+
+    // OWM points (3)
+    const wOWM = 0.18; // each -> 0.54 total
+    owmResults.forEach(r => {
+      parts.push({ speed: r.speed, gust: r.gust, deg: r.deg, w: wOWM });
+    });
+
+    // Open-Meteo (3)
+    const wOM = 0.10;  // each -> 0.30 total
+    omResults.forEach(r => {
+      parts.push({ speed: r.speed, gust: r.gust, deg: r.deg, w: wOM });
+    });
+
+    // METAR (optional)
+    if (metar){
+      parts.push({ speed: metar.speed, gust: metar.gust, deg: metar.deg, w: 0.16 });
+    }
+
+    const totalW = parts.reduce((a,b)=>a + b.w, 0) || 1;
+
+    const avgSpeed = parts.reduce((a,b)=>a + b.speed*b.w, 0) / totalW;
+    const avgGust  = parts.reduce((a,b)=>a + b.gust*b.w, 0) / totalW;
+    const avgDeg   = meanDirectionDeg(parts.map(p => ({ deg: p.deg, w: p.w })));
+
+    // Store reading (m/s inside for reuse)
+    const reading = {
+      timestamp: new Date(),
+      speed: avgSpeed,
+      gust: avgGust,
+      deg: avgDeg,
+      wave: waveResult.wave,
+      waterTemp: waveResult.waterTemp,
+      temp: (owmResults[0]?.temp ?? 0)
+    };
+
+    state.readings.push(reading);
+    if (state.readings.length > 1440) state.readings.shift(); // 24h @ 1/min
+
+    // Update main UI
+    setText('currentSpeed', msToKnots1(avgSpeed));
+    setText('windDir', getDir(avgDeg));
+    setText('windGust', msToKnots1(avgGust));
+    setText('temp', (reading.temp ?? 0).toFixed(0) + '°');
+    setText('waterTempMain', (waveResult.waterTemp ?? 23).toFixed(0) + '°');
+    setText('waterTempSide', (waveResult.waterTemp ?? 23).toFixed(0) + '°');
+    setText('waveHeight', (waveResult.wave ?? 0.6).toFixed(1));
+
+    // Compass
+    const arrow = document.getElementById('compassArrow');
+    if (arrow) arrow.style.transform = `translateX(-50%) rotate(${avgDeg}deg)`;
+
+    if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+    renderHistory();
+  }
+
+  function renderHistory(){
+    if (!state.readings.length) return;
+
+    const last24h = state.readings.filter(r => (new Date() - r.timestamp) / (1000*60*60) <= 24);
+    let dataToShow = (state.currentInterval === '15min') ? aggregateEvery15(last24h) : last24h;
+    if (!dataToShow.length) return;
+
+    // Chart
+    ensureChart();
+    const labels = dataToShow.map(p => p.timestamp.toLocaleTimeString('he-IL', {
+      timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+    }));
+
+    const speedKn = dataToShow.map(p => Number((p.speed * KNOTS).toFixed(2)));
+    const gustKn  = dataToShow.map(p => Number((p.gust  * KNOTS).toFixed(2)));
+
+    windChartInstance.data.labels = labels;
+    windChartInstance.data.datasets[0].data = speedKn;
+    windChartInstance.data.datasets[1].data = gustKn;
+    windChartInstance.update('none');
+
+    // Table (last 20)
+    const table = document.getElementById('recentHoursTable');
+    const recent = dataToShow.slice(-20).reverse();
+
+    table.innerHTML = recent.map(p => {
+      const timeStr = p.timestamp.toLocaleTimeString('he-IL', {
+        timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+      });
+      return `
+        <tr class="border-b border-slate-200 hover:bg-slate-50">
+          <td class="whitespace-nowrap font-mono text-slate-700">${timeStr}</td>
+          <td class="font-extrabold text-slate-900">${(p.speed*KNOTS).toFixed(1)}</td>
+          <td class="font-extrabold text-orange-600">${(p.gust*KNOTS).toFixed(1)}</td>
+          <td class="text-center">
+            <i class="fas fa-arrow-up text-sky-700" title="${getDir(p.deg)}"
+               style="transform: rotate(${p.deg}deg); display:inline-block;"></i>
+          </td>
+          <td class="whitespace-nowrap text-amber-700 font-bold">${(p.wave ?? 0).toFixed(1)}</td>
+          <td class="whitespace-nowrap text-teal-700 font-bold">${(p.waterTemp ?? 0).toFixed(0)}°</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Start
+  fetchLiveData();
+  setInterval(fetchLiveData, 60000);
+  window.addEventListener('resize', () => {
+    if (windChartInstance) windChartInstance.resize();
   });
-  ctx.restore();
- }
-};
-
-function ensureChart(){
- if(chart)return;
- chart=new Chart(document.getElementById('windChart'),{
-  type:'line',
-  data:{labels:[],datasets:[
-   {label:'רוח (קשר)',data:[],borderWidth:2,pointRadius:0,fill:true,
-    backgroundColor:(ctx)=>{
-      const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);
-      g.addColorStop(0,'rgba(2,132,199,.25)');
-      g.addColorStop(1,'rgba(2,132,199,.03)');
-      return g;
-    }},
-   {label:'משבים',data:[],borderWidth:2,pointRadius:0,borderDash:[6,4]}
-  ]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   scales:{y:{beginAtZero:true,title:{display:true,text:'קשר'}}},
-   interaction:{mode:'index',intersect:false}
-  },
-  plugins:[windZonesPlugin]
- });
-}
-
-/* ===== Helpers ===== */
-function msToKnots(ms){return ms*KNOTS}
-function avgDir(degs){
- let x=0,y=0;
- degs.forEach(d=>{x+=Math.cos(d*Math.PI/180);y+=Math.sin(d*Math.PI/180)});
- return(Math.atan2(y,x)*180/Math.PI+360)%360;
-}
-
-/* ===== Fetch sensors ===== */
-async function fetchSensors(){
- const sensors=[];
-
- /* OpenWeather (3 points) */
- const owPts=[
-  [32.1101,34.7795],[32.0631,34.7636],[32.05,34.75]
- ];
- for(const[pLat,pLon] of owPts){
-  const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pLat}&lon=${pLon}&appid=0429ca60a348cdac63a6cc4547a6837d&units=metric`);
-  const j=await r.json();
-  sensors.push({w:j.wind.speed,g:j.wind.gust||j.wind.speed*1.2,d:j.wind.deg,weight:.15});
- }
-
- /* Open-Meteo (3 points) */
- const omPts=[[32.16,34.83],[32.02,34.75],[31.98,34.78]];
- for(const[pLat,pLon] of omPts){
-  const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pLat}&longitude=${pLon}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m`);
-  const j=await r.json();
-  sensors.push({
-   w:j.current.wind_speed_10m,
-   g:j.current.wind_gusts_10m||j.current.wind_speed_10m*1.2,
-   d:j.current.wind_direction_10m,
-   weight:.13
-  });
- }
-
- /* METAR LLBG */
- const mr=await fetch(`https://aviationweather.gov/api/data/metar?ids=LLBG&format=json`);
- const mj=(await mr.json())[0];
- if(mj){
-  sensors.push({
-   w:mj.wspd*0.514,
-   g:mj.wgst?mj.wgst*0.514:mj.wspd*0.6,
-   d:mj.wdir,
-   weight:.15
-  });
- }
-
- return sensors;
-}
-
-/* ===== Main tick ===== */
-async function tick(){
- const sensors=await fetchSensors();
- let sw=0,sg=0,sd=[],tw=0;
- sensors.forEach(s=>{
-  sw+=s.w*s.weight;
-  sg+=s.g*s.weight;
-  sd.push(s.d);
-  tw+=s.weight;
- });
- const rec={
-  t:new Date(),
-  w:msToKnots(sw/tw),
-  g:msToKnots(sg/tw),
-  d:avgDir(sd)
- };
- state.readings.push(rec);
- if(state.readings.length>1440)state.readings.shift();
- render();
-}
-
-function render(){
- ensureChart();
- const data=state.readings.slice(-240);
- chart.data.labels=data.map(r=>r.t.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}));
- chart.data.datasets[0].data=data.map(r=>r.w);
- chart.data.datasets[1].data=data.map(r=>r.g);
- chart.update('none');
-
- document.getElementById('tableBody').innerHTML=data.slice(-10).reverse().map(r=>`
-  <tr>
-   <td>${r.t.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}</td>
-   <td>${r.w.toFixed(1)}</td>
-   <td class="text-orange-600">${r.g.toFixed(1)}</td>
-   <td class="text-center"><i class="fas fa-arrow-up" style="transform:rotate(${r.d}deg)"></i></td>
-  </tr>
- `).join('');
-}
-
-tick();
-setInterval(tick,60000);
 </script>
 </body>
 </html>
