@@ -190,6 +190,34 @@
     .sensor-sub { font-size: .78rem; color:#64748b; display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
     .dir-chip { display:inline-flex; align-items:center; gap:.35rem; }
     .dir-arrow { color:#0284c7; display:inline-block; }
+
+    /* ===== Decision bar ===== */
+    .go-light{
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 2px solid rgba(15,23,42,.15);
+      box-shadow: 0 6px 18px rgba(15,23,42,.08);
+    }
+    .go-light.green{ background: #22c55e; }
+    .go-light.yellow{ background: #f59e0b; }
+    .go-light.red{ background: #ef4444; }
+
+    /* ===== Modal ===== */
+    .modal{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal.hidden{ display:none; }
+    .modal-card{
+      width: min(680px, 100%);
+    }
   </style>
 </head>
 
@@ -209,6 +237,35 @@
       רענון
     </button>
   </header>
+
+  <!-- Decision Bar -->
+  <section class="max-w-6xl mx-auto mb-5">
+    <div class="card p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+      <div class="flex items-center gap-3">
+        <div id="goLight" class="go-light red" title="מצב יציאה"></div>
+        <div>
+          <div id="goTitle" class="text-lg font-extrabold">—</div>
+          <div id="goSubtitle" class="text-sm text-slate-500">—</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="text-sm">
+          <div class="font-extrabold text-slate-700">
+            אמון: <span id="confidenceScore">—</span>
+          </div>
+          <div id="confidenceMeta" class="text-xs text-slate-400">—</div>
+        </div>
+
+        <button id="openPrefsBtn" class="btn">
+          <i class="fas fa-sliders"></i>
+          התאמה
+        </button>
+      </div>
+
+    </div>
+  </section>
 
   <main class="max-w-6xl mx-auto space-y-6">
 
@@ -385,8 +442,8 @@
         </div>
 
         <div class="seg">
-          <button id="btn-1min" class="active" onclick="setIntervalMode('1min')">כל דקה</button>
-          <button id="btn-15min" onclick="setIntervalMode('15min')">15 דקות</button>
+          <button id="btn-1min" onclick="setIntervalMode('1min')">כל דקה</button>
+          <button id="btn-15min" class="active" onclick="setIntervalMode('15min')">15 דקות</button>
         </div>
       </div>
 
@@ -414,6 +471,61 @@
     </section>
 
   </main>
+  <!-- Preferences Modal -->
+  <div id="prefsModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card card p-5">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h3 class="text-lg font-extrabold">התאמה אישית</h3>
+        <button id="closePrefsBtn" class="btn" style="padding:.35rem .55rem">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="text-sm font-extrabold text-slate-700">
+          משקל (ק״ג)
+          <input id="prefWeight" type="number" min="40" max="120" step="1"
+                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
+                 value="75"/>
+        </label>
+
+        <label class="text-sm font-extrabold text-slate-700">
+          ענף
+          <select id="prefDiscipline"
+                  class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2">
+            <option value="tt">טווינטיפ</option>
+            <option value="wave">גלים</option>
+            <option value="foil">פויל</option>
+          </select>
+        </label>
+
+        <label class="text-sm font-extrabold text-slate-700">
+          גודל קייט (מ״ר)
+          <input id="prefKite" type="number" min="5" max="15" step="1"
+                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
+                 value="12"/>
+        </label>
+
+        <label class="text-sm font-extrabold text-slate-700">
+          מינימום רוח (קשר) (אופציונלי)
+          <input id="prefMinWind" type="number" min="5" max="45" step="0.5"
+                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
+                 placeholder="לדוגמה 14"/>
+        </label>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-5">
+        <button id="resetPrefsBtn" class="btn">
+          <i class="fas fa-rotate-left"></i>
+          איפוס
+        </button>
+        <button id="savePrefsBtn" class="btn" style="background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.35);color:#047857">
+          <i class="fas fa-check"></i>
+          שמור
+        </button>
+      </div>
+    </div>
+  </div>
 
 <script>
   const OWM_API_KEY = '0429ca60a348cdac63a6cc4547a6837d';
@@ -443,8 +555,152 @@
 
   const state = {
     readings: [],
-    currentInterval: '1min'
+    currentInterval: '15min',
+    liveCount: 0
   };
+
+  // ===== Preferences + Decision =====
+  const PREFS_KEY = "windtlv_prefs_v1";
+  const defaultPrefs = { weightKg: 75, kiteM2: 12, discipline: "tt", minWind: null };
+
+  function loadPrefs(){
+    try{
+      const raw = localStorage.getItem(PREFS_KEY);
+      if (!raw) return { ...defaultPrefs };
+      return { ...defaultPrefs, ...JSON.parse(raw) };
+    }catch{
+      return { ...defaultPrefs };
+    }
+  }
+  function savePrefs(p){ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
+
+  function baseNeedKnotsByDiscipline(d){
+    if (d === "foil") return 10;
+    if (d === "wave") return 16;
+    return 15; // tt
+  }
+
+  // קייט: 10–15 => 1 קשר לכל מטר (יחסית ל-12)
+  // קייט: 5–9  => 2 קשר לכל מטר (אבל 12->10 עדיין 1 קשר/מטר)
+  function kiteAdjustmentKnots(kiteM2){
+    if (!Number.isFinite(kiteM2)) return 0;
+    if (kiteM2 >= 10){
+      return (12 - kiteM2) * 1;
+    }
+    return (12 - 10) * 1 + (10 - kiteM2) * 2;
+  }
+
+  function requiredWindKnots(prefs){
+    const base = baseNeedKnotsByDiscipline(prefs.discipline);
+    const weightAdj = (prefs.weightKg - 75) / 10; // +1 קשר לכל +10 ק"ג
+    const kiteAdj = kiteAdjustmentKnots(prefs.kiteM2);
+
+    let need = base + weightAdj + kiteAdj;
+    if (Number.isFinite(prefs.minWind) && prefs.minWind > 0){
+      need = Math.max(need, prefs.minWind);
+    }
+    return need;
+  }
+
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+  function mean(arr){
+    const xs = arr.filter(x => Number.isFinite(x));
+    if (!xs.length) return null;
+    return xs.reduce((s,x)=>s+x,0) / xs.length;
+  }
+  function stddev(arr){
+    const xs = arr.filter(x => Number.isFinite(x));
+    if (xs.length < 2) return 0;
+    const m = mean(xs);
+    const v = xs.reduce((s,x)=>s+(x-m)**2,0) / (xs.length - 1);
+    return Math.sqrt(v);
+  }
+
+  function computeDecisionAndConfidence({ fusedAvgKnots, sensors, nowTs, prefs }){
+    const need = requiredWindKnots(prefs);
+
+    let stateLight = "red";
+    if (fusedAvgKnots >= need + 1) stateLight = "green";
+    else if (fusedAvgKnots >= need - 1) stateLight = "yellow";
+
+    const title =
+      stateLight === "green" ? "צא לחוף זריז" :
+      stateLight === "yellow" ? "גבולי כרגע" :
+      "טוב למטקות";
+
+    const subtitle = `${fusedAvgKnots.toFixed(1)} קשר (יעד ~${need.toFixed(1)}) • ${prefs.discipline.toUpperCase()} • קייט ${prefs.kiteM2} • ${prefs.weightKg}kg`;
+
+    const MAX_AGE_MIN = 20;
+    const active = sensors
+      .filter(s => Number.isFinite(s.avgKnots) && Number.isFinite(s.ts))
+      .map(s => ({...s, ageMin: (nowTs - s.ts) / 60000 }))
+      .filter(s => s.ageMin <= MAX_AGE_MIN);
+
+    const nActive = active.length;
+    const coverage = clamp(nActive / 4, 0, 1);
+
+    const std = stddev(active.map(s => s.avgKnots));
+    const agreement = clamp(1 - (std / 4), 0, 1);
+
+    const maxAge = nActive ? Math.max(...active.map(s => s.ageMin)) : 999;
+    const freshness = clamp(1 - (maxAge / 40), 0, 1);
+
+    const confidence = Math.round(100 * (0.45*coverage + 0.40*agreement + 0.15*freshness));
+    const confidenceMeta = nActive ? `${nActive} חיישנים • σ=${std.toFixed(1)} • ${Math.round(maxAge)}ד׳` : "אין חיישנים עדכניים";
+
+    return { stateLight, title, subtitle, confidence, confidenceMeta };
+  }
+
+  function renderDecisionBar(res){
+    const light = document.getElementById("goLight");
+    const goTitle = document.getElementById("goTitle");
+    const goSubtitle = document.getElementById("goSubtitle");
+    const confScore = document.getElementById("confidenceScore");
+    const confMeta = document.getElementById("confidenceMeta");
+    if (!light) return;
+
+    light.classList.remove("red","yellow","green");
+    light.classList.add(res.stateLight);
+    goTitle.textContent = res.title;
+    goSubtitle.textContent = res.subtitle;
+    confScore.textContent = `${res.confidence}%`;
+    confMeta.textContent = res.confidenceMeta;
+  }
+
+  function openPrefs(){
+    const p = loadPrefs();
+    document.getElementById("prefWeight").value = p.weightKg;
+    document.getElementById("prefKite").value = p.kiteM2;
+    document.getElementById("prefDiscipline").value = p.discipline;
+    document.getElementById("prefMinWind").value = (p.minWind ?? "");
+    document.getElementById("prefsModal").classList.remove("hidden");
+  }
+  function closePrefs(){
+    document.getElementById("prefsModal").classList.add("hidden");
+  }
+
+  document.getElementById("openPrefsBtn")?.addEventListener("click", openPrefs);
+  document.getElementById("closePrefsBtn")?.addEventListener("click", closePrefs);
+
+  document.getElementById("savePrefsBtn")?.addEventListener("click", () => {
+    const prefs = {
+      weightKg: Number(document.getElementById("prefWeight").value) || 75,
+      kiteM2: Number(document.getElementById("prefKite").value) || 12,
+      discipline: document.getElementById("prefDiscipline").value || "tt",
+      minWind: (() => {
+        const v = Number(document.getElementById("prefMinWind").value);
+        return Number.isFinite(v) && v > 0 ? v : null;
+      })()
+    };
+    savePrefs(prefs);
+    closePrefs();
+    fetchLiveData(); // רענון כדי לעדכן מד החלטה מיד
+  });
+
+  document.getElementById("resetPrefsBtn")?.addEventListener("click", () => {
+    savePrefs({ ...defaultPrefs });
+    openPrefs();
+  });
 
   // ===== Chart.js: Wind zones plugin (knots) =====
   const windZonesPlugin = {
@@ -604,6 +860,43 @@
     return out;
   }
 
+  async function fetchOpenMeteoHistory(lat, lon, hoursBack = 24){
+    const url =
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
+      `&past_days=2&forecast_days=1&timezone=${encodeURIComponent(ISRAEL_TZ)}`;
+
+    const r = await fetch(url);
+    const j = await r.json();
+    const h = j.hourly || {};
+    const times = h.time || [];
+    const sp = h.wind_speed_10m || [];
+    const gd = h.wind_direction_10m || [];
+    const gu = h.wind_gusts_10m || [];
+
+    const now = Date.now();
+    const cutoff = now - hoursBack * 60 * 60 * 1000;
+
+    const kmhToMs = (k) => (Number(k || 0) / 3.6);
+
+    const out = [];
+    for (let i = 0; i < times.length; i++){
+      const ts = new Date(times[i]).getTime();
+      if (!Number.isFinite(ts)) continue;
+      if (ts < cutoff || ts > now) continue;
+
+      out.push({
+        timestamp: new Date(ts),
+        speed: kmhToMs(sp[i]),
+        gust: kmhToMs(gu[i] ?? sp[i]),
+        deg: Number(gd[i] ?? 0),
+        wave: null,
+        waterTemp: null,
+        temp: null
+      });
+    }
+    return out;
+  }
   async function fetchOpenMeteoPoint(lat, lon){
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
     const r = await fetch(url);
@@ -640,9 +933,6 @@
   }
 
   function parseWaveRangeFromText(text){
-    // examples:
-    // "גובה הגלים: 50 - 130 ס\"מ"
-    // sometimes with spaces, sometimes different hyphen
     const re = /גובה\s*הגלים\s*:\s*(\d+)\s*[-–]\s*(\d+)\s*ס["״]?מ/;
     const m = text.match(re);
     if (!m) return null;
@@ -653,27 +943,24 @@
   }
 
   async function fetchTlvSeaWaveRange(){
-    // Try direct first
     try{
       const r = await fetch(TLV_SEA_PAGE, { mode: 'cors' });
       const t = await r.text();
       const range = parseWaveRangeFromText(t);
       if (range) return { ...range, source: 'עיריית ת״א' };
-    }catch(e){ /* ignore */ }
+    }catch(e){}
 
-    // Fallback via Jina proxy (usually CORS-friendly)
     try{
       const r = await fetch(JINA_PROXY(TLV_SEA_PAGE));
       const t = await r.text();
       const range = parseWaveRangeFromText(t);
       if (range) return { ...range, source: 'עיריית ת״א' };
-    }catch(e){ /* ignore */ }
+    }catch(e){}
 
     return null;
   }
 
   async function fetchWaveFallbackOpenMeteoMarine(){
-    // fallback model if municipality parsing fails
     const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.lat}&longitude=${WAVE_COORDS.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`;
     const r = await fetch(url);
     const j = await r.json();
@@ -721,7 +1008,6 @@
     ]);
 
     // Update per-coast sensors UI (speed, gust, dir)
-    // OWM cards
     setText('speed1', msToKnots1(owmResults[0]?.speed ?? 0));
     setText('gust1',  msToKnots1(owmResults[0]?.gust ?? 0));
     setRot('dirIcon1', owmResults[0]?.deg ?? 0);
@@ -759,8 +1045,6 @@
     }
 
     // Water temp + wave height:
-    // If we have TLV range → show it and compute avg meters for the big number
-    // Otherwise fallback to Open-Meteo Marine.
     let waveMeters = null;
     let waveRangeText = null;
     let waterTemp = null;
@@ -784,12 +1068,10 @@
       }
     }
 
-    // We always fetch water temp from marine (stable) if not set from fallback
     if (waterTemp == null){
       try{
         const marine = await fetchWaveFallbackOpenMeteoMarine();
         waterTemp = marine.waterTemp ?? 23;
-        // If TLV wave exists, we still prefer TLV for wave, but SST from marine is fine.
       } catch(e){
         waterTemp = 23;
       }
@@ -820,6 +1102,36 @@
     const avgGust  = parts.reduce((a,b)=>a + b.gust*b.w, 0) / totalW;
     const avgDeg   = meanDirectionDeg(parts.map(p => ({ deg: p.deg, w: p.w })));
 
+    // Decision + Confidence (based on sensors)
+    const nowTs = Date.now();
+    const sensors = [];
+
+    // OWM 3
+    sensors.push({ name: "OWM הילטון", avgKnots: msToKnots(owmResults[0]?.speed ?? 0), ts: nowTs });
+    sensors.push({ name: "OWM קלור",   avgKnots: msToKnots(owmResults[1]?.speed ?? 0), ts: nowTs });
+    sensors.push({ name: "OWM יפו",    avgKnots: msToKnots(owmResults[2]?.speed ?? 0), ts: nowTs });
+
+    // OM 3
+    sensors.push({ name: "OM הרצליה", avgKnots: msToKnots(omResults[0]?.speed ?? 0), ts: nowTs });
+    sensors.push({ name: "OM בת ים",  avgKnots: msToKnots(omResults[1]?.speed ?? 0), ts: nowTs });
+    sensors.push({ name: "OM ראשלצ",  avgKnots: msToKnots(omResults[2]?.speed ?? 0), ts: nowTs });
+
+    // METAR
+    if (metar){
+      sensors.push({ name: "METAR LLBG", avgKnots: msToKnots(metar.speed ?? 0), ts: nowTs });
+    }
+
+    const prefs = loadPrefs();
+    const fusedAvgKnots = msToKnots(avgSpeed);
+
+    const dc = computeDecisionAndConfidence({
+      fusedAvgKnots,
+      sensors,
+      nowTs,
+      prefs
+    });
+    renderDecisionBar(dc);
+
     // Store reading
     const reading = {
       timestamp: new Date(),
@@ -832,6 +1144,15 @@
     };
 
     state.readings.push(reading);
+    state.liveCount += 1;
+
+    // Default to 15min until we have 60 live points
+    if (state.liveCount < 60){
+      state.currentInterval = "15min";
+      document.getElementById('btn-1min').classList.toggle('active', false);
+      document.getElementById('btn-15min').classList.toggle('active', true);
+    }
+
     if (state.readings.length > 1440) state.readings.shift();
 
     // Update main UI
@@ -876,6 +1197,10 @@
       const timeStr = p.timestamp.toLocaleTimeString('he-IL', {
         timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
       });
+
+      const waveCell = (p.wave == null) ? '--' : Number(p.wave).toFixed(1);
+      const waterCell = (p.waterTemp == null) ? '--' : (Number(p.waterTemp).toFixed(0) + '°');
+
       return `
         <tr class="border-b border-slate-200 hover:bg-slate-50">
           <td class="whitespace-nowrap font-mono text-slate-700">${timeStr}</td>
@@ -885,16 +1210,32 @@
             <i class="fas fa-arrow-up text-sky-700" title="${getDir(p.deg)}"
                style="transform: rotate(${p.deg}deg); display:inline-block;"></i>
           </td>
-          <td class="whitespace-nowrap text-amber-700 font-bold">${Number(p.wave ?? 0).toFixed(1)}</td>
-          <td class="whitespace-nowrap text-teal-700 font-bold">${Number(p.waterTemp ?? 0).toFixed(0)}°</td>
+          <td class="whitespace-nowrap text-amber-700 font-bold">${waveCell}</td>
+          <td class="whitespace-nowrap text-teal-700 font-bold">${waterCell}</td>
         </tr>
       `;
     }).join('');
   }
 
   // Start
-  fetchLiveData();
-  setInterval(fetchLiveData, 60000);
+  (async () => {
+    // Seed history from Bat Yam (Open-Meteo hourly)
+    const hist = await fetchOpenMeteoHistory(openMeteoPoints.batyam.lat, openMeteoPoints.batyam.lon, 24)
+      .catch(() => []);
+
+    if (hist.length){
+      state.readings = hist;
+      // עדיף להתחיל ב-15 דקות כשיש היסטוריה שהיא hourly
+      state.currentInterval = "15min";
+      document.getElementById('btn-1min').classList.toggle('active', false);
+      document.getElementById('btn-15min').classList.toggle('active', true);
+      renderHistory();
+    }
+
+    await fetchLiveData();
+    setInterval(fetchLiveData, 60000);
+  })();
+
   window.addEventListener('resize', () => {
     if (windChartInstance) windChartInstance.resize();
   });
