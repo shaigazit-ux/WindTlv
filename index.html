@@ -2,8 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>תל אביב קייט | מדידות חוף</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>תל אביב קייט | מדידות חוף משולבות IMS</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -11,1234 +11,1440 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    * { font-family: 'Assistant', sans-serif; }
-
-    :root{
-      --bg1:#f0f9ff;
-      --bg2:#e0f2fe;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#475569;
-      --border:#cbd5e1;
-      --brand:#0284c7;
-      --brand2:#0ea5e9;
-      --wind:#0369a1;
+    :root {
+      --bg1: #f0f9ff;
+      --bg2: #e0f2fe;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --brand: #0284c7;
+      --brand2: #0ea5e9;
+      --wind: #0369a1;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --ims: #7c3aed; /* Purple for IMS */
     }
 
-    body{
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    * { font-family: 'Assistant', sans-serif; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
       color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .card{
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .loading-shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(2,132,199,.10);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+    .card:hover { box-shadow: 0 8px 30px rgba(2, 132, 199, 0.12); }
 
-    .badge{
-      font-size:.72rem;
-      background:#e0f2fe;
+    .badge {
+      font-size: 0.75rem;
+      background: rgba(2, 132, 199, 0.1);
       color: var(--brand);
-      padding:.18rem .55rem;
+      padding: 0.25rem 0.75rem;
       border-radius: 999px;
-      border: 1px solid rgba(2,132,199,.22);
-      display:inline-flex;
-      align-items:center;
-      gap:.35rem;
-      white-space: nowrap;
+      border: 1px solid rgba(2, 132, 199, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+    }
+    .badge.ims {
+      background: rgba(124, 58, 237, 0.1);
+      color: var(--ims);
+      border-color: rgba(124, 58, 237, 0.2);
     }
 
-    .btn{
-      background: rgba(2,132,199,.12);
-      border: 1px solid rgba(2,132,199,.22);
+    .btn {
+      background: rgba(2, 132, 199, 0.1);
+      border: 1px solid rgba(2, 132, 199, 0.25);
       color: var(--brand);
-      padding: .45rem .7rem;
+      padding: 0.5rem 1rem;
       border-radius: 12px;
-      transition: .2s;
-      display:inline-flex;
-      align-items:center;
-      gap:.45rem;
-      font-weight: 800;
-      font-size: .9rem;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
-    .btn:hover{ background: rgba(2,132,199,.18); }
-    .btn:active{ transform: translateY(1px); }
+    .btn:hover { background: rgba(2, 132, 199, 0.18); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* ===== Compass ===== */
-    .compass{
-      width: 148px;
-      height: 148px;
+    .compass {
+      width: 160px;
+      height: 160px;
       border-radius: 50%;
-      border: 2px solid var(--border);
-      background: #f8fafc;
+      border: 3px solid var(--border);
+      background: linear-gradient(145deg, #f8fafc, #f1f5f9);
       position: relative;
-      box-shadow: inset 0 0 0 10px rgba(14,165,233,.08);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.05), 0 4px 15px rgba(0,0,0,0.1);
     }
-    .compass::after{
-      content:"";
-      position:absolute;
-      inset:14px;
-      border-radius:50%;
-      border:1px dashed #94a3b8;
+    .compass::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      border: 2px dashed rgba(148, 163, 184, 0.4);
     }
-    .compass-degree{
-      position:absolute;
-      font-size:.68rem;
-      color:#64748b;
-      font-weight:800;
-      background: rgba(255,255,255,.88);
-      border:1px solid rgba(203,213,225,.8);
-      padding:.05rem .28rem;
-      border-radius: 8px;
+    .compass-degree {
+      position: absolute;
+      font-size: 0.7rem;
+      color: #64748b;
+      font-weight: 800;
+      background: rgba(255,255,255,0.9);
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .deg-n{top:6px;left:50%;transform:translateX(-50%)}
-    .deg-e{right:6px;top:50%;transform:translateY(-50%)}
-    .deg-s{bottom:6px;left:50%;transform:translateX(-50%)}
-    .deg-w{left:6px;top:50%;transform:translateY(-50%)}
+    .deg-n { top: 8px; left: 50%; transform: translateX(-50%); }
+    .deg-e { right: 8px; top: 50%; transform: translateY(-50%); }
+    .deg-s { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .deg-w { left: 8px; top: 50%; transform: translateY(-50%); }
 
-    .compass-arrow{
-      position:absolute;
-      bottom:50%;
-      left:50%;
-      width: 5px;
-      height: 54px;
+    .compass-arrow {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      width: 6px;
+      height: 60px;
       border-radius: 999px;
-      background: linear-gradient(to top,var(--brand2),var(--brand));
+      background: linear-gradient(to top, var(--brand2), var(--brand));
       transform-origin: bottom center;
       transform: translateX(-50%) rotate(0deg);
-      box-shadow: 0 6px 12px rgba(2,132,199,.22);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .compass-arrow::after{
-      content:"";
-      position:absolute;
-      top:-10px;
-      left:50%;
+    .compass-arrow::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
       transform: translateX(-50%);
-      border-left:9px solid transparent;
-      border-right:9px solid transparent;
-      border-bottom:12px solid var(--brand);
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 14px solid var(--brand);
     }
 
-    /* ===== Interval buttons ===== */
-    .seg{
-      background: rgba(148,163,184,.20);
-      border: 1px solid rgba(148,163,184,.35);
+    .seg {
+      background: rgba(148, 163, 184, 0.15);
+      border: 1px solid rgba(148, 163, 184, 0.3);
       border-radius: 999px;
-      padding: .2rem;
-      display:inline-flex;
-      gap:.25rem;
+      padding: 0.25rem;
+      display: inline-flex;
+      gap: 0.25rem;
     }
-    .seg button{
-      padding:.38rem .7rem;
+    .seg button {
+      padding: 0.4rem 0.9rem;
       border-radius: 999px;
-      font-weight: 900;
-      font-size: .85rem;
-      color: #334155;
-      transition:.15s;
-      border:1px solid transparent;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #475569;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
     }
-    .seg button.active{
+    .seg button.active {
       background: #ffffff;
-      border-color: rgba(2,132,199,.25);
+      border-color: rgba(2, 132, 199, 0.3);
       color: var(--brand);
-      box-shadow: 0 6px 16px rgba(2,132,199,.12);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
     }
 
-    /* ===== Chart container ===== */
-    .chart-shell{
+    .chart-shell {
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px;
-      height: 280px;
-      box-shadow: inset 0 0 0 1px rgba(15,23,42,.02);
+      border-radius: 16px;
+      padding: 16px;
+      height: 320px;
+      position: relative;
     }
-    @media(max-width:640px){
-      .chart-shell{ height: 240px; }
-    }
-
-    /* ===== Tight table ===== */
-    .table-tight th, .table-tight td{
-      padding: .28rem .42rem;
-      font-size: .82rem;
-      vertical-align: middle;
-    }
-    @media (max-width: 640px){
-      .table-tight th, .table-tight td{ font-size: .72rem; padding: .25rem .34rem; }
+    @media(max-width: 640px) {
+      .chart-shell { height: 260px; padding: 12px; }
+      .compass { width: 140px; height: 140px; }
     }
 
-    .mini-pill{
-      border:1px solid rgba(2,132,199,.20);
-      background: rgba(2,132,199,.08);
-      color:#0b5b88;
-      border-radius: 999px;
-      padding:.2rem .55rem;
-      font-size: .78rem;
-      font-weight: 800;
-      display:inline-flex;
-      align-items:center;
-      gap:.35rem;
-      white-space: nowrap;
+    .table-tight { width: 100%; border-collapse: collapse; }
+    .table-tight th, .table-tight td {
+      padding: 0.6rem 0.5rem;
+      font-size: 0.85rem;
+      text-align: right;
     }
-
-    /* sensor cards */
-    .sensor-title { font-size: .78rem; color: #64748b; font-weight: 800; }
-    .sensor-speed { font-size: 1.55rem; font-weight: 900; color: #075985; line-height: 1.1; }
-    .sensor-sub { font-size: .78rem; color:#64748b; display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
-    .dir-chip { display:inline-flex; align-items:center; gap:.35rem; }
-    .dir-arrow { color:#0284c7; display:inline-block; }
-
-    /* ===== Decision bar ===== */
-    .go-light{
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      border: 2px solid rgba(15,23,42,.15);
-      box-shadow: 0 6px 18px rgba(15,23,42,.08);
+    .table-tight th {
+      color: #64748b;
+      font-weight: 700;
+      border-bottom: 2px solid #e2e8f0;
     }
-    .go-light.green{ background: #22c55e; }
-    .go-light.yellow{ background: #f59e0b; }
-    .go-light.red{ background: #ef4444; }
+    .table-tight td { border-bottom: 1px solid #f1f5f9; }
+    .table-tight tr:hover td { background: #f8fafc; }
 
-    /* ===== Modal ===== */
-    .modal{
+    .sensor-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .sensor-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+    .sensor-card.ims { border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.03); }
+    .sensor-card.ims:hover { border-color: var(--ims); }
+    
+    .sensor-title { font-size: 0.8rem; color: #64748b; font-weight: 700; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem; }
+    .sensor-speed { font-size: 1.8rem; font-weight: 900; color: var(--wind); line-height: 1; }
+    .sensor-card.ims .sensor-speed { color: var(--ims); }
+    .sensor-meta { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .sensor-status { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .status-fresh { background: var(--success); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
+    .status-stale { background: var(--warning); }
+    .status-offline { background: var(--danger); }
+
+    .decision-bar {
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      border-right: 4px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .decision-bar.green { border-right-color: var(--success); }
+    .decision-bar.yellow { border-right-color: var(--warning); }
+    .decision-bar.red { border-right-color: var(--danger); }
+    
+    .go-light {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.8);
+      box-shadow: 0 0 0 2px currentColor, 0 4px 12px currentColor;
+      transition: all 0.3s ease;
+    }
+    .go-light.green { color: var(--success); background: var(--success); }
+    .go-light.yellow { color: var(--warning); background: var(--warning); }
+    .go-light.red { color: var(--danger); background: var(--danger); }
+
+    .modal {
       position: fixed;
       inset: 0;
-      background: rgba(15,23,42,.45);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
       z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
     }
-    .modal.hidden{ display:none; }
-    .modal-card{
-      width: min(680px, 100%);
+    .modal.visible { opacity: 1; visibility: visible; }
+    .modal-card {
+      width: min(600px, 100%);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .modal.visible .modal-card { transform: scale(1); }
+
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .live-indicator { animation: pulse-live 2s infinite; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .source-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand), var(--brand2));
+    }
+    .source-indicator.ims {
+      background: linear-gradient(90deg, var(--ims), #a78bfa);
     }
   </style>
 </head>
 
 <body class="px-4 py-6">
-  <header class="max-w-6xl mx-auto mb-5 flex items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-extrabold tracking-tight"><i class="fas fa-kite mr-1"></i> תל אביב קייט</h1>
-      <div class="flex items-center gap-2 mt-1 flex-wrap">
-        <span class="badge"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>LIVE</span>
-        <span class="text-sm text-slate-500"><i class="fas fa-clock ml-1"></i> שעון: <span id="israelTime" class="font-mono text-slate-700">--:--:--</span></span>
-        <span class="text-sm text-slate-400">• ממוצע משוקלל</span>
+  <header class="max-w-6xl mx-auto mb-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-800 flex items-center gap-3">
+          <i class="fas fa-wind text-sky-600"></i>
+          תל אביב קייט
+        </h1>
+        <div class="flex items-center gap-3 mt-2 flex-wrap">
+          <span class="badge">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 live-indicator inline-block"></span>
+            LIVE
+          </span>
+          <span class="badge ims">
+            <i class="fas fa-building-columns"></i>
+            IMS רשמי
+          </span>
+          <span class="text-sm text-slate-500 flex items-center gap-1">
+            <i class="fas fa-clock"></i>
+            <span id="israelTime" class="font-mono text-slate-700">--:--:--</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="lastUpdate" class="text-xs text-slate-400 hidden md:block">עודכן: --</span>
+        <button onclick="fetchAllData()" class="btn" id="refreshBtn">
+          <i class="fas fa-rotate" id="refreshIcon"></i>
+          רענון
+        </button>
       </div>
     </div>
-
-    <button onclick="fetchLiveData()" class="btn">
-      <i class="fas fa-rotate" id="refreshIcon"></i>
-      רענון
-    </button>
   </header>
 
   <!-- Decision Bar -->
-  <section class="max-w-6xl mx-auto mb-5">
-    <div class="card p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-
-      <div class="flex items-center gap-3">
-        <div id="goLight" class="go-light red" title="מצב יציאה"></div>
-        <div>
-          <div id="goTitle" class="text-lg font-extrabold">—</div>
-          <div id="goSubtitle" class="text-sm text-slate-500">—</div>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="text-sm">
-          <div class="font-extrabold text-slate-700">
-            <i class="fas fa-shield-halved ml-1"></i> אמון: <span id="confidenceScore">—</span>
+  <section class="max-w-6xl mx-auto mb-6">
+    <div id="decisionBar" class="card p-5 decision-bar red">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div id="goLight" class="go-light red"></div>
+          <div>
+            <div id="goTitle" class="text-xl font-extrabold text-slate-800">טוען נתונים...</div>
+            <div id="goSubtitle" class="text-sm text-slate-500 mt-1">ממתין לנתוני חיישנים</div>
           </div>
-          <div id="confidenceMeta" class="text-xs text-slate-400">—</div>
         </div>
 
-        <button id="openPrefsBtn" class="btn">
-          <i class="fas fa-sliders"></i>
-          התאמה
-        </button>
-      </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="text-xs text-slate-400 mb-1">רמת אמון במדידה</div>
+            <div class="flex items-center gap-2">
+              <div class="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div id="confidenceBar" class="h-full bg-sky-500 transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <span id="confidenceScore" class="font-bold text-slate-700">--%</span>
+            </div>
+            <div id="confidenceMeta" class="text-xs text-slate-400 mt-1">--</div>
+          </div>
 
+          <button onclick="openPrefs()" class="btn">
+            <i class="fas fa-sliders"></i>
+            התאמה אישית
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
   <main class="max-w-6xl mx-auto space-y-6">
-
-    <!-- Dashboard -->
-    <section class="card p-5 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="md:col-span-2">
-        <p class="text-sm text-slate-500 mb-1"><i class="fas fa-wind ml-1"></i> מהירות רוח ממוצעת</p>
-        <div class="flex items-end gap-3">
-          <span id="currentSpeed" class="text-6xl font-extrabold" style="color:var(--wind)">--</span>
-          <span class="text-xl mb-1 font-bold">קשר</span>
-        </div>
-        <p class="text-xs text-slate-500 mt-1">המרה: m/s × 1.94</p>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-center">
-          <div class="card !shadow-none p-3" style="border-radius:14px">
-            <p class="text-xs text-slate-500"><i class="fas fa-compass ml-1"></i> כיוון</p>
-            <p id="windDir" class="font-extrabold">--</p>
+    
+    <!-- Main Dashboard -->
+    <section class="card p-6 md:p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Wind Data -->
+        <div class="lg:col-span-2 space-y-6">
+          <div>
+            <p class="text-sm text-slate-500 mb-2 font-medium">מהירות רוח ממוצעת (משוקללת)</p>
+            <div class="flex items-baseline gap-3">
+              <span id="currentSpeed" class="text-7xl font-extrabold text-sky-700 tracking-tight">--</span>
+              <span class="text-2xl font-bold text-slate-400">קשר</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">ממוצע משוקלל מ-IMS, OWM, Open-Meteo ו-METAR</p>
           </div>
-          <div class="card !shadow-none p-3" style="border-radius:14px">
-            <p class="text-xs text-slate-500"><i class="fas fa-bolt ml-1"></i> משבים</p>
-            <p id="windGust" class="font-extrabold text-orange-600">--</p>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-sky-50 rounded-xl p-4 border border-sky-100">
+              <p class="text-xs text-sky-600 font-bold mb-1"><i class="fas fa-compass ml-1"></i> כיוון</p>
+              <p id="windDir" class="text-2xl font-extrabold text-slate-800">--</p>
+              <p id="windDirDeg" class="text-xs text-slate-400">--°</p>
+            </div>
+            <div class="bg-orange-50 rounded-xl p-4 border border-orange-100">
+              <p class="text-xs text-orange-600 font-bold mb-1"><i class="fas fa-bolt ml-1"></i> משבים</p>
+              <p id="windGust" class="text-2xl font-extrabold text-orange-600">--</p>
+              <p class="text-xs text-slate-400">קשר</p>
+            </div>
+            <div class="bg-teal-50 rounded-xl p-4 border border-teal-100">
+              <p class="text-xs text-teal-600 font-bold mb-1"><i class="fas fa-water ml-1"></i> מים</p>
+              <p id="waterTempMain" class="text-2xl font-extrabold text-teal-700">--</p>
+              <p class="text-xs text-slate-400">°C</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <p class="text-xs text-slate-600 font-bold mb-1"><i class="fas fa-thermometer-half ml-1"></i> חוף</p>
+              <p id="temp" class="text-2xl font-extrabold text-slate-700">--</p>
+              <p class="text-xs text-slate-400">°C</p>
+            </div>
           </div>
-          <div class="card !shadow-none p-3" style="border-radius:14px">
-            <p class="text-xs text-slate-500"><i class="fas fa-temperature-low ml-1"></i> מים</p>
-            <p id="waterTempMain" class="font-extrabold text-teal-700">--</p>
+
+          <div class="flex flex-wrap gap-2">
+            <span class="badge ims"><i class="fas fa-building-columns"></i> IMS רשמי</span>
+            <span class="badge"><i class="fas fa-cloud"></i> OpenWeatherMap</span>
+            <span class="badge"><i class="fas fa-satellite"></i> Open-Meteo</span>
+            <span class="badge"><i class="fas fa-plane"></i> METAR נתב״ג</span>
           </div>
-          <div class="card !shadow-none p-3" style="border-radius:14px">
-            <p class="text-xs text-slate-500"><i class="fas fa-thermometer-half ml-1"></i> חוף</p>
-            <p id="temp" class="font-extrabold">--</p>
+        </div>
+
+        <!-- Compass -->
+        <div class="flex items-center justify-center">
+          <div class="relative">
+            <div class="compass" title="כיוון הרוח">
+              <div class="compass-degree deg-n">N</div>
+              <div class="compass-degree deg-e">E</div>
+              <div class="compass-degree deg-s">S</div>
+              <div class="compass-degree deg-w">W</div>
+              <div id="compassArrow" class="compass-arrow"></div>
+            </div>
+            <div class="text-center mt-4 text-sm text-slate-500 font-medium">
+              <span id="compassLabel">--°</span>
+            </div>
           </div>
         </div>
-
-        <div class="mt-5 flex flex-wrap gap-2">
-          <span class="mini-pill"><i class="fas fa-cloud"></i> OWM חוף</span>
-          <span class="mini-pill"><i class="fas fa-satellite"></i> Open-Meteo</span>
-          <span class="mini-pill"><i class="fas fa-plane"></i> נתב״ג METAR</span>
-          <span class="mini-pill"><i class="fas fa-water"></i> מצב הים</span>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-center">
-        <div class="compass" title="כיוון רוח (מעלות)">
-          <div class="compass-degree deg-n">0°</div>
-          <div class="compass-degree deg-e">90°</div>
-          <div class="compass-degree deg-s">180°</div>
-          <div class="compass-degree deg-w">270°</div>
-          <div id="compassArrow" class="compass-arrow"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sea / temps -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="card p-4">
-        <div class="flex items-center justify-between gap-2">
-          <p class="text-sm font-extrabold"><i class="fas fa-water ml-1"></i> גובה גלים</p>
-          <span class="badge" id="waveSourceBadge">טוען…</span>
-        </div>
-        <div class="mt-2 flex items-end gap-2">
-          <span id="waveHeight" class="text-4xl font-extrabold text-amber-600">--</span>
-          <span class="text-sm text-slate-500 mb-1">מ׳</span>
-        </div>
-        <p id="waveRangeText" class="text-xs text-slate-500 mt-2">--</p>
-      </div>
-
-      <div class="card p-4">
-        <p class="text-sm font-extrabold"><i class="fas fa-temperature-low ml-1"></i> טמפרטורת מים</p>
-        <p id="waterTempSide" class="text-4xl font-extrabold text-teal-700 mt-2">--</p>
-        <p class="text-xs text-slate-500 mt-2">SST</p>
       </div>
     </section>
 
-    <!-- OWM coastal sensors -->
-    <section class="card p-5 md:p-6">
-      <div class="flex items-center justify-between gap-3 mb-4">
+    <!-- Sea Conditions -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-water text-amber-500 text-xl"></i>
+            <h3 class="font-extrabold text-slate-800">גובה גלים</h3>
+          </div>
+          <span id="waveSourceBadge" class="badge">טוען...</span>
+        </div>
+        <div class="flex items-end gap-2 mb-2">
+          <span id="waveHeight" class="text-5xl font-extrabold text-amber-600">--</span>
+          <span class="text-lg text-slate-400 mb-1">מטרים</span>
+        </div>
+        <p id="waveRangeText" class="text-sm text-slate-500">--</p>
+      </div>
+
+      <div class="card p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-temperature-low text-teal-500 text-xl"></i>
+          <h3 class="font-extrabold text-slate-800">טמפרטורת מים</h3>
+        </div>
+        <div class="flex items-end gap-2">
+          <span id="waterTempSide" class="text-5xl font-extrabold text-teal-700">--</span>
+          <span class="text-lg text-slate-400 mb-1">°C</span>
+        </div>
+        <p class="text-sm text-slate-500 mt-2">Sea Surface Temperature (SST)</p>
+      </div>
+    </section>
+
+    <!-- IMS Station - Featured -->
+    <section class="card p-6 border-2 border-purple-200 bg-purple-50/30">
+      <div class="source-indicator ims"></div>
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-lg font-extrabold"><i class="fas fa-wind ml-1"></i> חיישני חוף</h2>
-          <p class="text-sm text-slate-500"><i class="fas fa-chart-line ml-1"></i> מהירות / משבים / כיוון</p>
+          <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fas fa-building-columns text-purple-600"></i>
+            תחנת IMS תל אביב חוף
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">תחנה 178 • נתונים רשמיים מהשירות המטאורולוגי הישראלי</p>
         </div>
-        <span class="badge">OWM</span>
+        <span class="badge ims">מקור ראשי</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> הילטון (צפון)</div>
-          <div class="sensor-speed"><span id="speed1">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="gust1" class="font-extrabold text-orange-600">--</span></span>
-            <span class="dir-chip">
-              <i class="fas fa-arrow-up dir-arrow" id="dirIcon1" style="transform:rotate(0deg)"></i>
-            </span>
-          </div>
-        </div>
-
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> צ'רלס קלור (מרכז)</div>
-          <div class="sensor-speed"><span id="speed2">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="gust2" class="font-extrabold text-orange-600">--</span></span>
-            <span class="dir-chip">
-              <i class="fas fa-arrow-up dir-arrow" id="dirIcon2" style="transform:rotate(0deg)"></i>
-            </span>
-          </div>
-        </div>
-
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> יפו (דרום)</div>
-          <div class="sensor-speed"><span id="speed3">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="gust3" class="font-extrabold text-orange-600">--</span></span>
-            <span class="dir-chip">
-              <i class="fas fa-arrow-up dir-arrow" id="dirIcon3" style="transform:rotate(0deg)"></i>
-            </span>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="imsStationCard">
+        <!-- IMS data populated here -->
+      </div>
+      
+      <div class="mt-4 p-3 bg-purple-100 rounded-lg text-sm text-purple-800">
+        <i class="fas fa-info-circle ml-1"></i>
+        תחנה 178 ממוקמת על גג בגובה 10 מטר מעל פני הים, כ-100 מטר מקו החוף (בית האצ"ל)
       </div>
     </section>
 
-    <!-- Extra sensors -->
-    <section class="card p-5 md:p-6">
-      <div class="flex items-center justify-between gap-3 mb-4">
+    <!-- All Sensors Grid -->
+    <section class="card p-6">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-lg font-extrabold"><i class="fas fa-tower-broadcast ml-1"></i> חיישנים נוספים</h2>
-          <p class="text-sm text-slate-500"><i class="fas fa-satellite ml-1"></i> Open-Meteo + <i class="fas fa-plane ml-1"></i> נתב״ג</p>
+          <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fas fa-network-wired text-slate-600"></i>
+            כל החיישנים
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">השוואת נתונים בזמן אמת מכל המקורות</p>
         </div>
-        <span class="badge">LIVE</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> הרצליה (OM)</div>
-          <div class="sensor-speed"><span id="omHerzliya">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="omHerzliyaGust" class="font-extrabold text-orange-600">--</span></span>
-            <i class="fas fa-arrow-up dir-arrow" id="omHerzliyaDir" style="transform:rotate(0deg)"></i>
-          </div>
-        </div>
-
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> בת ים (OM)</div>
-          <div class="sensor-speed"><span id="omBatYam">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="omBatYamGust" class="font-extrabold text-orange-600">--</span></span>
-            <i class="fas fa-arrow-up dir-arrow" id="omBatYamDir" style="transform:rotate(0deg)"></i>
-          </div>
-        </div>
-
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-location-dot ml-1"></i> ראשל״צ (OM)</div>
-          <div class="sensor-speed"><span id="omRishon">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="omRishonGust" class="font-extrabold text-orange-600">--</span></span>
-            <i class="fas fa-arrow-up dir-arrow" id="omRishonDir" style="transform:rotate(0deg)"></i>
-          </div>
-        </div>
-
-        <div class="card !shadow-none p-4" style="border-radius:14px">
-          <div class="sensor-title"><i class="fas fa-plane-departure ml-1"></i> נתב״ג (LLBG)</div>
-          <div class="sensor-speed"><span id="metarLLBG">--</span> <span class="text-base font-extrabold text-slate-700">קשר</span></div>
-          <div class="sensor-sub mt-2">
-            <span><i class="fas fa-bolt ml-1"></i> משבים: <span id="metarLLBGGust" class="font-extrabold text-orange-600">--</span></span>
-            <i class="fas fa-arrow-up dir-arrow" id="metarLLBGDir" style="transform:rotate(0deg)"></i>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="allSensorsGrid">
+        <!-- All sensors populated here -->
       </div>
     </section>
 
-    <!-- History -->
-    <section class="card p-5 md:p-6">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+    <!-- History Chart -->
+    <section class="card p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 class="text-lg font-extrabold"><i class="fas fa-chart-line ml-1"></i> גרף רוח (24 שעות)</h2>
-          <p class="text-sm text-slate-500"><i class="fas fa-layer-group ml-1"></i> רצועות צבע לפי עוצמה + מהירות/משבים</p>
+          <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fas fa-chart-line text-sky-600"></i>
+            היסטוריית רוח (24 שעות)
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">רצועות צבע מייצגות עוצמת רוח</p>
         </div>
 
         <div class="seg">
-          <button id="btn-1min" onclick="setIntervalMode('1min')"><i class="fas fa-stopwatch ml-1"></i> כל דקה</button>
-          <button id="btn-15min" class="active" onclick="setIntervalMode('15min')"><i class="fas fa-clock ml-1"></i> 15 דקות</button>
+          <button id="btn-1min" onclick="setIntervalMode('1min')">
+            <i class="fas fa-stopwatch ml-1"></i> דקה
+          </button>
+          <button id="btn-15min" class="active" onclick="setIntervalMode('15min')">
+            <i class="fas fa-clock ml-1"></i> 15 דקות
+          </button>
         </div>
       </div>
 
       <div class="chart-shell mb-6">
-        <canvas id="windChart" aria-label="Wind chart" role="img"></canvas>
+        <canvas id="windChart" aria-label="Wind speed history chart"></canvas>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-right table-tight">
-          <thead class="text-slate-500 border-b border-slate-200">
+        <table class="table-tight">
+          <thead>
             <tr>
-              <th class="whitespace-nowrap"><i class="fas fa-clock ml-1"></i> שעה</th>
-              <th class="whitespace-nowrap"><i class="fas fa-wind ml-1"></i> רוח</th>
-              <th class="whitespace-nowrap"><i class="fas fa-bolt ml-1"></i> משבים</th>
-              <th class="text-center whitespace-nowrap"><i class="fas fa-compass ml-1"></i> כיוון</th>
-              <th class="whitespace-nowrap"><i class="fas fa-water ml-1"></i> גל</th>
+              <th>שעה</th>
+              <th>מקור</th>
+              <th>רוח (קשר)</th>
+              <th>משבים (קשר)</th>
+              <th class="text-center">כיוון</th>
+              <th>גל (מ׳)</th>
             </tr>
           </thead>
           <tbody id="recentHoursTable">
-            <tr><td colspan="5" class="text-center py-6 text-slate-400">אין נתונים</td></tr>
+            <tr><td colspan="6" class="text-center py-8 text-slate-400">טוען נתונים...</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
   </main>
+
   <!-- Preferences Modal -->
-  <div id="prefsModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-card card p-5">
-      <div class="flex items-center justify-between gap-3 mb-4">
-        <h3 class="text-lg font-extrabold"><i class="fas fa-sliders ml-1"></i> התאמה אישית</h3>
-        <button id="closePrefsBtn" class="btn" style="padding:.35rem .55rem">
-          <i class="fas fa-xmark"></i>
+  <div id="prefsModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card card p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+          <i class="fas fa-sliders text-sky-600"></i>
+          התאמה אישית
+        </h3>
+        <button onclick="closePrefs()" class="btn" style="padding: 0.5rem;">
+          <i class="fas fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label class="text-sm font-extrabold text-slate-700">
-          <i class="fas fa-weight-scale ml-1"></i> משקל (ק״ג)
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-2">
+            <i class="fas fa-weight-scale ml-1"></i> משקל (ק״ג)
+          </label>
           <input id="prefWeight" type="number" min="40" max="120" step="1"
-                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
+                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none"
                  value="75"/>
-        </label>
+        </div>
 
-        <label class="text-sm font-extrabold text-slate-700">
-          <i class="fas fa-person-snowboarding ml-1"></i> ענף
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-2">
+            <i class="fas fa-person-snowboarding ml-1"></i> ענף
+          </label>
           <select id="prefDiscipline"
-                  class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2">
-            <option value="tt">טווינטיפ</option>
-            <option value="wave">גלים</option>
-            <option value="foil">פויל</option>
+                  class="w-full rounded-xl border border-slate-300 px-4 py-3 text-lg focus:ring-2 focus:ring-sky-500 outline-none bg-white">
+            <option value="tt">טווינטיפ (Twin Tip)</option>
+            <option value="wave">גלים (Wave)</option>
+            <option value="foil">פויל (Foil)</option>
           </select>
-        </label>
+        </div>
 
-        <label class="text-sm font-extrabold text-slate-700">
-          <i class="fas fa-kite ml-1"></i> גודל קייט (מ״ר)
-          <input id="prefKite" type="number" min="5" max="15" step="1"
-                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-2">
+            <i class="fas fa-kite ml-1"></i> גודל קייט (מ״ר)
+          </label>
+          <input id="prefKite" type="number" min="5" max="17" step="1"
+                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-lg focus:ring-2 focus:ring-sky-500 outline-none"
                  value="12"/>
-        </label>
+        </div>
 
-        <label class="text-sm font-extrabold text-slate-700">
-          <i class="fas fa-arrow-up-wide-short ml-1"></i> מינימום רוח (קשר) (אופציונלי)
-          <input id="prefMinWind" type="number" min="5" max="45" step="0.5"
-                 class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"
-                 placeholder="לדוגמה 14"/>
-        </label>
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-2">
+            <i class="fas fa-arrow-up-wide-short ml-1"></i> מינימום רוח (קשר)
+          </label>
+          <input id="prefMinWind" type="number" min="5" max="50" step="0.5"
+                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-lg focus:ring-2 focus:ring-sky-500 outline-none"
+                 placeholder="אוטומטי"/>
+          <p class="text-xs text-slate-400 mt-1">השאר ריק לחישוב אוטומטי לפי המשקל והענף</p>
+        </div>
       </div>
 
-      <div class="flex items-center justify-end gap-2 mt-5">
-        <button id="resetPrefsBtn" class="btn">
+      <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
+        <button onclick="resetPrefs()" class="btn text-slate-600 bg-slate-100 border-slate-200">
           <i class="fas fa-rotate-left"></i>
           איפוס
         </button>
-        <button id="savePrefsBtn" class="btn" style="background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.35);color:#047857">
+        <button onclick="savePrefs()" class="btn bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-200">
           <i class="fas fa-check"></i>
-          שמור
+          שמור הגדרות
         </button>
       </div>
 
-      <p class="text-xs text-slate-400 mt-3">
-        <i class="fas fa-floppy-disk ml-1"></i>
-        ההגדרות נשמרות מקומית בדפדפן שלך.
+      <p class="text-xs text-slate-400 mt-4 text-center">
+        <i class="fas fa-shield-halved ml-1"></i>
+        ההגדרות נשמרות מקומית בדפדפן בלבד
       </p>
     </div>
   </div>
 
 <script>
-  const OWM_API_KEY = '0429ca60a348cdac63a6cc4547a6837d';
-  const KNOTS = 1.94384;
-  const ISRAEL_TZ = 'Asia/Jerusalem';
-
-  // Wave + SST fallback point (marine)
-  const WAVE_COORDS = { lat: 32.1656, lon: 34.8368 };
-
-  // Tel Aviv municipality sea-state page (contains: "גובה הגלים: 50 - 130 ס\"מ")
-  const TLV_SEA_PAGE = 'https://www.tel-aviv.gov.il/Visitors/Pages/TelAvivBeach.aspx';
-  const JINA_PROXY = (url) => `https://r.jina.ai/${url}`;
-
-  // Base 3 coastal points (OWM)
-  const windSensorsOWM = [
-    { id: 1, lat: 32.1101, lon: 34.7795, name: 'הילטון' },
-    { id: 2, lat: 32.0631, lon: 34.7636, name: 'קלור' },
-    { id: 3, lat: 32.0500, lon: 34.7500, name: 'יפו' }
-  ];
-
-  // Extra open sensors (Open-Meteo, no key)
-  const openMeteoPoints = {
-    herzliya: { lat: 32.1656, lon: 34.8368, label: 'הרצליה' },
-    batyam:   { lat: 32.0167, lon: 34.7500, label: 'בת ים' },
-    rishon:   { lat: 31.9870, lon: 34.7590, label: 'ראשל״צ' }
+  // ==================== Configuration ====================
+  const CONFIG = {
+    // API Keys
+    OWM_API_KEY: '0429ca60a348cdac63a6cc4547a6837d',
+    IMS_API_KEY: '1a901e45-9028-44ff-bd2c-35e82407fb9b',
+    
+    // Constants
+    KNOTS: 1.94384,
+    ISRAEL_TZ: 'Asia/Jerusalem',
+    UPDATE_INTERVAL: 60000, // 1 minute
+    
+    // IMS Station IDs
+    IMS_STATIONS: {
+      telAvivBeach: 178,    // תל אביב חוף - Main station
+      // Additional coastal stations can be added here
+    },
+    
+    // Channel IDs for IMS (wind-related)
+    IMS_CHANNELS: {
+      WS: 'WS',      // Wind Speed (m/s)
+      WD: 'WD',      // Wind Direction (degrees)
+      WSMAX: 'WSMAX', // Max Wind Speed (gusts)
+      TD: 'TD',      // Temperature
+      RH: 'RH',      // Humidity
+      BP: 'BP'       // Barometric Pressure
+    }
   };
 
+  // ==================== State ====================
   const state = {
     readings: [],
     currentInterval: '15min',
-    liveCount: 0
+    liveCount: 0,
+    lastFetch: null,
+    sensorData: {},
+    imsData: null
   };
 
-  // ===== Preferences + Decision (LocalStorage) =====
-  const PREFS_KEY = "windtlv_prefs_v1";
-  const defaultPrefs = { weightKg: 75, kiteM2: 12, discipline: "tt", minWind: null };
+  const defaultPrefs = { 
+    weightKg: 75, 
+    kiteM2: 12, 
+    discipline: "tt", 
+    minWind: null 
+  };
 
-  function loadPrefs(){
-    try{
-      const raw = localStorage.getItem(PREFS_KEY);
-      if (!raw) return { ...defaultPrefs };
-      return { ...defaultPrefs, ...JSON.parse(raw) };
-    }catch{
-      return { ...defaultPrefs };
-    }
-  }
-  function savePrefs(p){
-    try{ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }catch{}
-  }
-
-  function baseNeedKnotsByDiscipline(d){
-    if (d === "foil") return 10;
-    if (d === "wave") return 16;
-    return 15; // tt
-  }
-
-  // קייט: 10–15 => 1 קשר לכל מטר (יחסית ל-12)
-  // קייט: 5–9  => 2 קשר לכל מטר (אבל 12->10 עדיין 1 קשר/מטר)
-  function kiteAdjustmentKnots(kiteM2){
-    if (!Number.isFinite(kiteM2)) return 0;
-    if (kiteM2 >= 10){
-      return (12 - kiteM2) * 1;
-    }
-    return (12 - 10) * 1 + (10 - kiteM2) * 2;
-  }
-
-  function requiredWindKnots(prefs){
-    const base = baseNeedKnotsByDiscipline(prefs.discipline);
-    const weightAdj = (prefs.weightKg - 75) / 10; // +1 קשר לכל +10 ק"ג
-    const kiteAdj = kiteAdjustmentKnots(prefs.kiteM2);
-
-    let need = base + weightAdj + kiteAdj;
-    if (Number.isFinite(prefs.minWind) && prefs.minWind > 0){
-      need = Math.max(need, prefs.minWind);
-    }
-    return need;
-  }
-
-  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
-  function mean(arr){
-    const xs = arr.filter(x => Number.isFinite(x));
-    if (!xs.length) return null;
-    return xs.reduce((s,x)=>s+x,0) / xs.length;
-  }
-  function stddev(arr){
-    const xs = arr.filter(x => Number.isFinite(x));
-    if (xs.length < 2) return 0;
-    const m = mean(xs);
-    const v = xs.reduce((s,x)=>s+(x-m)**2,0) / (xs.length - 1);
-    return Math.sqrt(v);
-  }
-
-  function computeDecisionAndConfidence({ fusedAvgKnots, sensors, nowTs, prefs }){
-    const need = requiredWindKnots(prefs);
-
-    let stateLight = "red";
-    if (fusedAvgKnots >= need + 1) stateLight = "green";
-    else if (fusedAvgKnots >= need - 1) stateLight = "yellow";
-
-    const title =
-      stateLight === "green" ? "צא לחוף זריז" :
-      stateLight === "yellow" ? "גבולי כרגע" :
-      "טוב למטקות";
-
-    const subtitle = `${fusedAvgKnots.toFixed(1)} קשר (יעד ~${need.toFixed(1)}) • ${prefs.discipline.toUpperCase()} • קייט ${prefs.kiteM2} • ${prefs.weightKg}kg`;
-
-    const MAX_AGE_MIN = 20;
-    const active = sensors
-      .filter(s => Number.isFinite(s.avgKnots) && Number.isFinite(s.ts))
-      .map(s => ({...s, ageMin: (nowTs - s.ts) / 60000 }))
-      .filter(s => s.ageMin <= MAX_AGE_MIN);
-
-    const nActive = active.length;
-    const coverage = clamp(nActive / 4, 0, 1);
-
-    const std = stddev(active.map(s => s.avgKnots));
-    const agreement = clamp(1 - (std / 4), 0, 1);
-
-    const maxAge = nActive ? Math.max(...active.map(s => s.ageMin)) : 999;
-    const freshness = clamp(1 - (maxAge / 40), 0, 1);
-
-    const confidence = Math.round(100 * (0.45*coverage + 0.40*agreement + 0.15*freshness));
-    const confidenceMeta = nActive ? `${nActive} חיישנים • σ=${std.toFixed(1)} • ${Math.round(maxAge)}ד׳` : "אין חיישנים עדכניים";
-
-    return { stateLight, title, subtitle, confidence, confidenceMeta };
-  }
-
-  function renderDecisionBar(res){
-    const light = document.getElementById("goLight");
-    const goTitle = document.getElementById("goTitle");
-    const goSubtitle = document.getElementById("goSubtitle");
-    const confScore = document.getElementById("confidenceScore");
-    const confMeta = document.getElementById("confidenceMeta");
-    if (!light) return;
-
-    light.classList.remove("red","yellow","green");
-    light.classList.add(res.stateLight);
-    goTitle.textContent = res.title;
-    goSubtitle.textContent = res.subtitle;
-    confScore.textContent = `${res.confidence}%`;
-    confMeta.textContent = res.confidenceMeta;
-  }
-
-  function openPrefs(){
-    const p = loadPrefs();
-    document.getElementById("prefWeight").value = p.weightKg;
-    document.getElementById("prefKite").value = p.kiteM2;
-    document.getElementById("prefDiscipline").value = p.discipline;
-    document.getElementById("prefMinWind").value = (p.minWind ?? "");
-    document.getElementById("prefsModal").classList.remove("hidden");
-  }
-  function closePrefs(){
-    document.getElementById("prefsModal").classList.add("hidden");
-  }
-
-  document.getElementById("openPrefsBtn")?.addEventListener("click", openPrefs);
-  document.getElementById("closePrefsBtn")?.addEventListener("click", closePrefs);
-
-  // close on overlay click
-  document.getElementById("prefsModal")?.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "prefsModal") closePrefs();
-  });
-
-  document.getElementById("savePrefsBtn")?.addEventListener("click", () => {
-    const prefs = {
-      weightKg: Number(document.getElementById("prefWeight").value) || 75,
-      kiteM2: Number(document.getElementById("prefKite").value) || 12,
-      discipline: document.getElementById("prefDiscipline").value || "tt",
-      minWind: (() => {
-        const v = Number(document.getElementById("prefMinWind").value);
-        return Number.isFinite(v) && v > 0 ? v : null;
-      })()
-    };
-    savePrefs(prefs);
-    closePrefs();
-    fetchLiveData(); // מד החלטה מתעדכן מיד
-  });
-
-  document.getElementById("resetPrefsBtn")?.addEventListener("click", () => {
-    savePrefs({ ...defaultPrefs });
-    openPrefs();
-  });
-
-  // ===== Chart.js: Wind zones plugin (knots) =====
-  const windZonesPlugin = {
-    id: 'windZones',
-    beforeDraw(chart) {
-      const { ctx, chartArea, scales } = chart;
-      if (!chartArea) return;
-      const y = scales.y;
-      if (!y) return;
-
-      const zones = [
-        { from: 0,  to: 10, color: 'rgba(148,163,184,0.16)' },
-        { from: 10, to: 15, color: 'rgba(34,197,94,0.14)'  },
-        { from: 15, to: 20, color: 'rgba(59,130,246,0.13)' },
-        { from: 20, to: 25, color: 'rgba(245,158,11,0.13)' },
-        { from: 25, to: 60, color: 'rgba(239,68,68,0.11)'  }
-      ];
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
-      ctx.clip();
-
-      zones.forEach(z => {
-        const yTop = y.getPixelForValue(z.to);
-        const yBottom = y.getPixelForValue(z.from);
-        ctx.fillStyle = z.color;
-        ctx.fillRect(chartArea.left, yTop, chartArea.right - chartArea.left, yBottom - yTop);
-      });
-
-      ctx.restore();
+  // ==================== Sensor Definitions ====================
+  const sensorDefs = {
+    ims: {
+      id: 'ims',
+      name: 'IMS תל אביב חוף',
+      type: 'ims',
+      stationId: 178,
+      weight: 0.35, // Higher weight for official IMS data
+      color: 'purple'
+    },
+    owm: [
+      { id: 'hilton', lat: 32.1101, lon: 34.7795, name: 'הילטון', region: 'צפון', weight: 0.15 },
+      { id: 'clore', lat: 32.0631, lon: 34.7636, name: 'קלור', region: 'מרכז', weight: 0.15 },
+      { id: 'jaffa', lat: 32.0500, lon: 34.7500, name: 'יפו', region: 'דרום', weight: 0.15 }
+    ],
+    openmeteo: [
+      { id: 'herzliya', lat: 32.1656, lon: 34.8368, name: 'הרצליה', weight: 0.08 },
+      { id: 'batyam', lat: 32.0167, lon: 34.7500, name: 'בת ים', weight: 0.08 },
+      { id: 'rishon', lat: 31.9870, lon: 34.7590, name: 'ראשל״צ', weight: 0.04 }
+    ],
+    metar: {
+      id: 'llbg',
+      code: 'LLBG',
+      name: 'נתב״ג',
+      weight: 0.10
     }
   };
 
-  let windChartInstance = null;
+  // ==================== Utility Functions ====================
+  const $ = id => document.getElementById(id);
+  const msToKnots = ms => ms * CONFIG.KNOTS;
+  const msToKnotsStr = ms => msToKnots(ms).toFixed(1);
+  const kmhToMs = kmh => kmh / 3.6;
+  const knotsToMs = kts => kts * 0.514444;
 
-  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  const setRot = (id, deg) => { const el = document.getElementById(id); if (el) el.style.transform = `rotate(${deg}deg)`; };
-
-  function msToKnots(ms){ return (ms * KNOTS); }
-  function msToKnots1(ms){ return (ms * KNOTS).toFixed(1); }
-
-  function getDir(deg){
-    const dirs = ['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
+  function getDir(deg) {
+    const dirs = ['צפון', 'צפון-מזרח', 'מזרח', 'דרום-מזרח', 'דרום', 'דרום-מערב', 'מערב', 'צפון-מערב'];
     return dirs[Math.round(deg / 45) % 8];
   }
 
-  function formatIsraelTime(date){
+  function formatTime(date) {
     return date.toLocaleTimeString('he-IL', {
-      timeZone: ISRAEL_TZ,
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false
+      timeZone: CONFIG.ISRAEL_TZ,
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     });
   }
 
-  function meanDirectionDeg(degWeights){
-    let x = 0, y = 0;
-    degWeights.forEach(({deg, w}) => {
+  function meanDirectionDeg(readings) {
+    let x = 0, y = 0, totalW = 0;
+    readings.forEach(({ deg, w = 1 }) => {
+      if (!Number.isFinite(deg)) return;
       const rad = deg * Math.PI / 180;
       x += Math.cos(rad) * w;
       y += Math.sin(rad) * w;
+      totalW += w;
     });
-    if (x === 0 && y === 0) return 0;
+    if (totalW === 0) return 0;
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  // Clock
-  setInterval(() => {
-    const el = document.getElementById('israelTime');
-    if (el) el.textContent = formatIsraelTime(new Date());
-  }, 1000);
-
-  function setIntervalMode(mode){
-    state.currentInterval = mode;
-    document.getElementById('btn-1min').classList.toggle('active', mode === '1min');
-    document.getElementById('btn-15min').classList.toggle('active', mode === '15min');
-    renderHistory();
+  // ==================== Storage ====================
+  function loadPrefs() {
+    try {
+      const raw = localStorage.getItem('windtlv_prefs_v3');
+      return raw ? { ...defaultPrefs, ...JSON.parse(raw) } : { ...defaultPrefs };
+    } catch {
+      return { ...defaultPrefs };
+    }
   }
 
-  function ensureChart(){
-    if (windChartInstance) return;
+  function savePrefsToStorage(prefs) {
+    try { localStorage.setItem('windtlv_prefs_v3', JSON.stringify(prefs)); } catch {}
+  }
 
-    const ctx = document.getElementById('windChart');
+  // ==================== Wind Calculations ====================
+  function baseNeedKnotsByDiscipline(d) {
+    const map = { foil: 10, wave: 16, tt: 15 };
+    return map[d] || 15;
+  }
 
-    windChartInstance = new Chart(ctx, {
+  function kiteAdjustmentKnots(kiteM2) {
+    if (!Number.isFinite(kiteM2)) return 0;
+    if (kiteM2 >= 10) return (12 - kiteM2) * 1;
+    return (12 - 10) * 1 + (10 - kiteM2) * 2;
+  }
+
+  function requiredWindKnots(prefs) {
+    const base = baseNeedKnotsByDiscipline(prefs.discipline);
+    const weightAdj = (prefs.weightKg - 75) / 10;
+    const kiteAdj = kiteAdjustmentKnots(prefs.kiteM2);
+    let need = base + weightAdj + kiteAdj;
+    if (Number.isFinite(prefs.minWind) && prefs.minWind > 0) {
+      need = Math.max(need, prefs.minWind);
+    }
+    return Math.max(5, need);
+  }
+
+  // ==================== IMS API Functions ====================
+  
+  // Fetch IMS station metadata to get channel IDs
+  async function fetchIMSStationMeta(stationId) {
+    const url = `https://api.ims.gov.il/v1/envista/stations/${stationId}`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `ApiToken ${CONFIG.IMS_API_KEY}`
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('IMS Meta Error:', error);
+      return null;
+    }
+  }
+
+  // Fetch latest data from IMS station
+  async function fetchIMSLatestData(stationId) {
+    // Get latest data for all channels
+    const url = `https://api.ims.gov.il/v1/envista/stations/${stationId}/data/latest`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `ApiToken ${CONFIG.IMS_API_KEY}`
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      return parseIMSData(data);
+    } catch (error) {
+      console.error('IMS Data Error:', error);
+      return null;
+    }
+  }
+
+  // Parse IMS response to extract wind data
+  function parseIMSData(data) {
+    if (!data || !data.data || !Array.isArray(data.data)) return null;
+    
+    const latest = data.data[0]; // Most recent reading
+    if (!latest) return null;
+
+    const channels = latest.channels || [];
+    const result = {
+      timestamp: new Date(latest.datetime || latest.time),
+      raw: latest
+    };
+
+    // Extract wind speed (WS - m/s)
+    const wsChannel = channels.find(c => c.id === 'WS' || c.name?.includes('WS'));
+    if (wsChannel && wsChannel.status === 1 && wsChannel.valid) {
+      result.speed = parseFloat(wsChannel.value);
+    }
+
+    // Extract wind direction (WD - degrees)
+    const wdChannel = channels.find(c => c.id === 'WD' || c.name?.includes('WD'));
+    if (wdChannel && wdChannel.status === 1 && wdChannel.valid) {
+      result.deg = parseFloat(wdChannel.value);
+    }
+
+    // Extract max wind speed/gusts (WSMAX or WS1mm)
+    const wsMaxChannel = channels.find(c => c.id === 'WSMAX' || c.name?.includes('WSMAX'));
+    const ws1mmChannel = channels.find(c => c.id === 'WS1mm' || c.name?.includes('WS1mm'));
+    if (wsMaxChannel && wsMaxChannel.status === 1 && wsMaxChannel.valid) {
+      result.gust = parseFloat(wsMaxChannel.value);
+    } else if (ws1mmChannel && ws1mmChannel.status === 1 && ws1mmChannel.valid) {
+      result.gust = parseFloat(ws1mmChannel.value);
+    }
+
+    // Extract temperature
+    const tdChannel = channels.find(c => c.id === 'TD' || c.name?.includes('TD'));
+    if (tdChannel && tdChannel.status === 1 && tdChannel.valid) {
+      result.temp = parseFloat(tdChannel.value);
+    }
+
+    // Extract humidity
+    const rhChannel = channels.find(c => c.id === 'RH' || c.name?.includes('RH'));
+    if (rhChannel && rhChannel.status === 1 && rhChannel.valid) {
+      result.humidity = parseFloat(rhChannel.value);
+    }
+
+    // If no gust data, estimate as 1.3x speed
+    if (!result.gust && result.speed) {
+      result.gust = result.speed * 1.3;
+    }
+
+    return result;
+  }
+
+  // ==================== Other Data Sources ====================
+  async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return response;
+    } catch (error) {
+      clearTimeout(id);
+      throw error;
+    }
+  }
+
+  async function fetchOWM(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${CONFIG.OWM_API_KEY}&units=metric`;
+    const res = await fetchWithTimeout(url);
+    const data = await res.json();
+    return {
+      speed: data.wind?.speed || 0,
+      deg: data.wind?.deg || 0,
+      gust: data.wind?.gust || (data.wind?.speed * 1.2),
+      temp: data.main?.temp,
+      timestamp: Date.now()
+    };
+  }
+
+  async function fetchOpenMeteo(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
+    const res = await fetchWithTimeout(url);
+    const data = await res.json();
+    const current = data.current;
+    return {
+      speed: kmhToMs(current.wind_speed_10m),
+      deg: current.wind_direction_10m,
+      gust: kmhToMs(current.wind_gusts_10m || current.wind_speed_10m),
+      timestamp: Date.now()
+    };
+  }
+
+  async function fetchMETAR(code) {
+    const url = `https://aviationweather.gov/api/data/metar?ids=${code}&format=json`;
+    const res = await fetchWithTimeout(url);
+    const data = await res.json();
+    const m = data[0];
+    return {
+      speed: knotsToMs(m.wspd || 0),
+      gust: knotsToMs(m.wgst || (m.wspd * 1.3)),
+      deg: m.wdir || 0,
+      timestamp: Date.now()
+    };
+  }
+
+  async function fetchMarineData() {
+    try {
+      const url = `https://marine-api.open-meteo.com/v1/marine?latitude=32.1656&longitude=34.8368&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`;
+      const res = await fetchWithTimeout(url);
+      const data = await res.json();
+      return {
+        wave: data.current?.wave_height,
+        waterTemp: data.current?.sea_surface_temperature
+      };
+    } catch {
+      return { wave: 0.5, waterTemp: 24 };
+    }
+  }
+
+  // ==================== UI Rendering ====================
+  function createSensorCard(sensor, data, options = {}) {
+    const isIMS = sensor.type === 'ims';
+    const hasData = data && Number.isFinite(data.speed);
+    const speed = hasData ? msToKnotsStr(data.speed) : '--';
+    const gust = hasData ? msToKnotsStr(data.gust || data.speed * 1.2) : '--';
+    const deg = hasData ? (data.deg || 0) : 0;
+    
+    let age = 999;
+    if (data?.timestamp) {
+      const ts = data.timestamp instanceof Date ? data.timestamp.getTime() : data.timestamp;
+      age = (Date.now() - ts) / 60000;
+    }
+    
+    const isFresh = age < 20;
+    const isStale = age < 60;
+    const statusClass = hasData ? (isFresh ? 'status-fresh' : (isStale ? 'status-stale' : 'status-offline')) : 'status-offline';
+    
+    const cardClass = isIMS ? 'sensor-card ims' : 'sensor-card';
+    const icon = isIMS ? 'fa-building-columns' : 'fa-location-dot';
+    
+    return `
+      <div class="${cardClass}" id="card-${sensor.id}">
+        ${isIMS ? '<div class="source-indicator ims"></div>' : ''}
+        <div class="flex items-center justify-between mb-2">
+          <div class="sensor-title">
+            <i class="fas ${icon} ml-1 ${isIMS ? 'text-purple-600' : ''}"></i>
+            ${sensor.name}
+            ${sensor.region ? `<span class="text-slate-400 text-xs">(${sensor.region})</span>` : ''}
+          </div>
+          <span class="sensor-status ${statusClass}"></span>
+        </div>
+        <div class="sensor-speed">${speed} <span class="text-sm text-slate-500">קשר</span></div>
+        <div class="sensor-meta">
+          <span><i class="fas fa-bolt text-orange-500 ml-1"></i>${gust}</span>
+          <span class="flex items-center gap-1">
+            <i class="fas fa-arrow-up ${isIMS ? 'text-purple-600' : 'text-sky-600'} transition-transform duration-500" style="transform: rotate(${deg}deg)"></i>
+            ${hasData ? `<span class="text-xs">${getDir(deg)}</span>` : ''}
+          </span>
+        </div>
+        ${isIMS && data?.temp ? `<div class="text-xs text-purple-600 mt-2"><i class="fas fa-thermometer-half"></i> ${data.temp.toFixed(1)}°C</div>` : ''}
+      </div>
+    `;
+  }
+
+  function renderIMSSection() {
+    const container = $('imsStationCard');
+    const data = state.imsData;
+    
+    if (!data) {
+      container.innerHTML = '<div class="col-span-3 text-center py-4 text-slate-400">טוען נתוני IMS...</div>';
+      return;
+    }
+
+    const speed = msToKnotsStr(data.speed || 0);
+    const gust = msToKnotsStr(data.gust || 0);
+    const deg = data.deg || 0;
+    const temp = data.temp ? data.temp.toFixed(1) : '--';
+    
+    container.innerHTML = `
+      <div class="bg-white rounded-xl p-4 border border-purple-200">
+        <div class="text-sm text-purple-600 font-bold mb-1">מהירות רוח</div>
+        <div class="text-3xl font-extrabold text-slate-800">${speed} <span class="text-lg text-slate-400">קשר</span></div>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-purple-200">
+        <div class="text-sm text-purple-600 font-bold mb-1">משבים מקסימליים</div>
+        <div class="text-3xl font-extrabold text-orange-600">${gust} <span class="text-lg text-slate-400">קשר</span></div>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-purple-200">
+        <div class="text-sm text-purple-600 font-bold mb-1">כיוון רוח</div>
+        <div class="text-3xl font-extrabold text-slate-800">${getDir(deg)}</div>
+        <div class="text-sm text-slate-400">${deg.toFixed(0)}°</div>
+      </div>
+    `;
+  }
+
+  function renderAllSensors() {
+    const container = $('allSensorsGrid');
+    const html = [];
+    
+    // IMS
+    if (state.imsData) {
+      html.push(createSensorCard(sensorDefs.ims, state.imsData));
+    }
+    
+    // OWM
+    sensorDefs.owm.forEach(s => {
+      const data = state.sensorData[s.id];
+      if (data) html.push(createSensorCard(s, data));
+    });
+    
+    // Open-Meteo
+    sensorDefs.openmeteo.forEach(s => {
+      const data = state.sensorData[s.id];
+      if (data) html.push(createSensorCard(s, data));
+    });
+    
+    // METAR
+    const metarData = state.sensorData[sensorDefs.metar.id];
+    if (metarData) {
+      html.push(createSensorCard({ ...sensorDefs.metar, name: 'נתב״ג METAR' }, metarData));
+    }
+    
+    container.innerHTML = html.join('') || '<div class="col-span-full text-center text-slate-400">אין נתונים זמינים</div>';
+  }
+
+  // ==================== Decision Logic ====================
+  function computeDecision(fusedAvgKnots, sensorReadings, prefs) {
+    const need = requiredWindKnots(prefs);
+    const buffer = 1.5;
+    
+    let status = 'red';
+    if (fusedAvgKnots >= need + buffer) status = 'green';
+    else if (fusedAvgKnots >= need - buffer) status = 'yellow';
+
+    const titles = {
+      green: { title: 'צא לחוף! 🏄', subtitle: `תנאים מעולים • ${fusedAvgKnots.toFixed(1)} קשר` },
+      yellow: { title: 'גבולי ⚠️', subtitle: `בדוק משבים • ${fusedAvgKnots.toFixed(1)} קשר (צריך ~${need.toFixed(1)})` },
+      red: { title: 'טוב למטקות ☕', subtitle: `חלש מדי • ${fusedAvgKnots.toFixed(1)} קשר (צריך ~${need.toFixed(1)})` }
+    };
+
+    // Calculate confidence based on data sources
+    const activeSensors = sensorReadings.filter(s => s.ts && (Date.now() - s.ts) < 30 * 60000);
+    const hasIMS = activeSensors.some(s => s.source === 'ims');
+    const coverage = Math.min(activeSensors.length / 6, 1);
+    const confidence = hasIMS ? Math.round(80 + coverage * 20) : Math.round(coverage * 80);
+    
+    return { status, ...titles[status], confidence, hasIMS };
+  }
+
+  function updateDecisionBar(result, prefs) {
+    const bar = $('decisionBar');
+    const light = $('goLight');
+    
+    bar.className = `card p-5 decision-bar ${result.status}`;
+    light.className = `go-light ${result.status}`;
+    
+    $('goTitle').textContent = result.title;
+    $('goSubtitle').textContent = result.subtitle;
+    $('confidenceScore').textContent = `${result.confidence}%`;
+    $('confidenceBar').style.width = `${result.confidence}%`;
+    $('confidenceBar').className = `h-full transition-all duration-500 ${result.hasIMS ? 'bg-purple-500' : 'bg-sky-500'}`;
+    $('confidenceMeta').textContent = result.hasIMS ? 'כולל נתוני IMS רשמיים' : `${result.confidence > 50 ? 'מספיק חיישנים' : 'מועט חיישנים'}`;
+  }
+
+  // ==================== Main Data Fetching ====================
+  async function fetchAllData() {
+    const btn = $('refreshBtn');
+    const icon = $('refreshIcon');
+    btn.disabled = true;
+    icon.classList.add('fa-spin');
+
+    const now = Date.now();
+    const sensorReadings = []; // For decision calculation
+
+    // 1. Fetch IMS (Official Israeli Meteorological Service) - Higher priority
+    try {
+      const imsData = await fetchIMSLatestData(CONFIG.IMS_STATIONS.telAvivBeach);
+      if (imsData && imsData.speed) {
+        state.imsData = imsData;
+        sensorReadings.push({
+          source: 'ims',
+          speed: msToKnots(imsData.speed),
+          ts: imsData.timestamp.getTime()
+        });
+      }
+    } catch (e) {
+      console.error('IMS fetch failed:', e);
+    }
+
+    // 2. Fetch OWM coastal points
+    await Promise.all(sensorDefs.owm.map(async s => {
+      try {
+        const data = await fetchOWM(s.lat, s.lon);
+        state.sensorData[s.id] = data;
+        sensorReadings.push({
+          source: 'owm',
+          speed: msToKnots(data.speed),
+          ts: data.timestamp
+        });
+      } catch (e) {
+        console.error(`OWM ${s.id} failed:`, e);
+      }
+    }));
+
+    // 3. Fetch Open-Meteo points
+    await Promise.all(sensorDefs.openmeteo.map(async s => {
+      try {
+        const data = await fetchOpenMeteo(s.lat, s.lon);
+        state.sensorData[s.id] = data;
+        sensorReadings.push({
+          source: 'openmeteo',
+          speed: msToKnots(data.speed),
+          ts: data.timestamp
+        });
+      } catch (e) {
+        console.error(`OpenMeteo ${s.id} failed:`, e);
+      }
+    }));
+
+    // 4. Fetch METAR
+    try {
+      const metarData = await fetchMETAR(sensorDefs.metar.code);
+      state.sensorData[sensorDefs.metar.id] = metarData;
+      sensorReadings.push({
+        source: 'metar',
+        speed: msToKnots(metarData.speed),
+        ts: metarData.timestamp
+      });
+    } catch (e) {
+      console.error('METAR fetch failed:', e);
+    }
+
+    // 5. Fetch marine data
+    let marineData;
+    try {
+      marineData = await fetchMarineData();
+    } catch (e) {
+      marineData = { wave: 0.5, waterTemp: 24 };
+    }
+
+    // Calculate weighted average (IMS gets higher weight)
+    let totalSpeed = 0, totalGust = 0, totalDirX = 0, totalDirY = 0, totalWeight = 0;
+
+    // IMS gets 35% weight if available
+    if (state.imsData && state.imsData.speed) {
+      const w = 0.35;
+      totalSpeed += state.imsData.speed * w;
+      totalGust += (state.imsData.gust || state.imsData.speed) * w;
+      const rad = (state.imsData.deg || 0) * Math.PI / 180;
+      totalDirX += Math.cos(rad) * w;
+      totalDirY += Math.sin(rad) * w;
+      totalWeight += w;
+    }
+
+    // OWM gets 15% each (45% total)
+    sensorDefs.owm.forEach(s => {
+      const data = state.sensorData[s.id];
+      if (data && data.speed) {
+        const w = 0.15;
+        totalSpeed += data.speed * w;
+        totalGust += (data.gust || data.speed) * w;
+        const rad = (data.deg || 0) * Math.PI / 180;
+        totalDirX += Math.cos(rad) * w;
+        totalDirY += Math.sin(rad) * w;
+        totalWeight += w;
+      }
+    });
+
+    // Open-Meteo gets remaining weight distributed
+    sensorDefs.openmeteo.forEach(s => {
+      const data = state.sensorData[s.id];
+      if (data && data.speed) {
+        const w = s.weight;
+        totalSpeed += data.speed * w;
+        totalGust += (data.gust || data.speed) * w;
+        const rad = (data.deg || 0) * Math.PI / 180;
+        totalDirX += Math.cos(rad) * w;
+        totalDirY += Math.sin(rad) * w;
+        totalWeight += w;
+      }
+    });
+
+    // METAR gets 10%
+    const metarData = state.sensorData[sensorDefs.metar.id];
+    if (metarData && metarData.speed) {
+      const w = 0.10;
+      totalSpeed += metarData.speed * w;
+      totalGust += (metarData.gust || metarData.speed) * w;
+      const rad = (metarData.deg || 0) * Math.PI / 180;
+      totalDirX += Math.cos(rad) * w;
+      totalDirY += Math.sin(rad) * w;
+      totalWeight += w;
+    }
+
+    const avgSpeed = totalWeight > 0 ? totalSpeed / totalWeight : 0;
+    const avgGust = totalWeight > 0 ? totalGust / totalWeight : 0;
+    const avgDeg = totalWeight > 0 ? (Math.atan2(totalDirY, totalDirX) * 180 / Math.PI + 360) % 360 : 0;
+
+    // Update main UI
+    $('currentSpeed').textContent = msToKnotsStr(avgSpeed);
+    $('windDir').textContent = getDir(avgDeg);
+    $('windDirDeg').textContent = `${Math.round(avgDeg)}°`;
+    $('windGust').textContent = msToKnotsStr(avgGust);
+    $('temp').textContent = state.imsData?.temp ? `${state.imsData.temp.toFixed(0)}°` : 
+      (state.sensorData.hilton?.temp ? `${Math.round(state.sensorData.hilton.temp)}°` : '--');
+    $('waterTempMain').textContent = marineData.waterTemp ? `${Math.round(marineData.waterTemp)}°` : '--';
+    $('waterTempSide').textContent = marineData.waterTemp ? `${Math.round(marineData.waterTemp)}°` : '--';
+    $('waveHeight').textContent = marineData.wave ? marineData.wave.toFixed(1) : '--';
+    $('waveRangeText').textContent = marineData.wave ? `טווח משוער: ${(marineData.wave * 0.7).toFixed(1)} - ${(marineData.wave * 1.3).toFixed(1)} מ׳` : '--';
+    $('waveSourceBadge').textContent = 'מודל ימי';
+
+    // Compass
+    $('compassArrow').style.transform = `translateX(-50%) rotate(${avgDeg}deg)`;
+    $('compassLabel').textContent = `${Math.round(avgDeg)}° ${getDir(avgDeg)}`;
+
+    // Decision
+    const prefs = loadPrefs();
+    const fusedAvgKnots = msToKnots(avgSpeed);
+    const decision = computeDecision(fusedAvgKnots, sensorReadings, prefs);
+    updateDecisionBar(decision, prefs);
+
+    // Store reading
+    state.readings.push({
+      timestamp: new Date(),
+      speed: avgSpeed,
+      gust: avgGust,
+      deg: avgDeg,
+      wave: marineData.wave || 0.5,
+      source: state.imsData ? 'ims-mixed' : 'mixed'
+    });
+    
+    if (state.readings.length > 1440) state.readings.shift();
+    
+    state.liveCount++;
+    state.lastFetch = now;
+    $('lastUpdate').textContent = `עודכן: ${formatTime(new Date())}`;
+
+    // Render sections
+    renderIMSSection();
+    renderAllSensors();
+    renderHistory();
+    
+    btn.disabled = false;
+    icon.classList.remove('fa-spin');
+  }
+
+  // ==================== Chart ====================
+  let windChart = null;
+
+  function initChart() {
+    const ctx = $('windChart').getContext('2d');
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(2, 132, 199, 0.3)');
+    gradient.addColorStop(1, 'rgba(2, 132, 199, 0.02)');
+
+    const gradientIMS = ctx.createLinearGradient(0, 0, 0, 300);
+    gradientIMS.addColorStop(0, 'rgba(124, 58, 237, 0.3)');
+    gradientIMS.addColorStop(1, 'rgba(124, 58, 237, 0.02)');
+
+    windChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
-        datasets: [
-          {
-            label: 'רוח (קשר)',
-            data: [],
-            tension: 0.25,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            backgroundColor: (context) => {
-              const { chart } = context;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) return 'rgba(2,132,199,0.10)';
-              const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-              g.addColorStop(0, 'rgba(2,132,199,0.26)');
-              g.addColorStop(1, 'rgba(2,132,199,0.02)');
-              return g;
-            }
-          },
-          {
-            label: 'משבים (קשר)',
-            data: [],
-            tension: 0.25,
-            borderWidth: 2,
-            pointRadius: 0,
-            borderDash: [6,4],
-            fill: false
-          }
-        ]
+        datasets: [{
+          label: 'רוח ממוצעת',
+          data: [],
+          borderColor: '#0284c7',
+          backgroundColor: gradient,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6
+        }, {
+          label: 'משבים',
+          data: [],
+          borderColor: '#f59e0b',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { display: true, labels: { boxWidth: 14, boxHeight: 2 } },
+          legend: { position: 'top', align: 'end', labels: { usePointStyle: true } },
           tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#0f172a',
+            bodyColor: '#0f172a',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
             callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)}`
+              label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)} קשר`
             }
           }
         },
         scales: {
-          x: { ticks: { maxTicksLimit: 8 }, grid: { display: false } },
-          y: { beginAtZero: true, title: { display: true, text: 'קשר' }, grid: { color: 'rgba(15,23,42,0.08)' } }
+          x: { 
+            grid: { display: false },
+            ticks: { maxTicksLimit: 8, color: '#64748b' }
+          },
+          y: { 
+            beginAtZero: true, 
+            grid: { color: '#e2e8f0' },
+            ticks: { color: '#64748b' },
+            title: { display: true, text: 'קשר', color: '#94a3b8' }
+          }
         }
-      },
-      plugins: [windZonesPlugin]
+      }
     });
   }
 
-  function aggregateEvery15(readings){
-    const out = [];
-    for (let i = 0; i < readings.length; i += 15){
+  function aggregateData(readings, mode) {
+    if (mode === '1min' || readings.length < 15) return readings;
+    
+    const aggregated = [];
+    for (let i = 0; i < readings.length; i += 15) {
       const chunk = readings.slice(i, i + 15);
-      if (!chunk.length) continue;
-
-      const dirMean = meanDirectionDeg(chunk.map(r => ({ deg: r.deg, w: 1 })));
-
-      out.push({
-        timestamp: chunk[Math.floor(chunk.length/2)].timestamp,
-        speed: chunk.reduce((a,b)=>a + b.speed, 0) / chunk.length,
-        deg: dirMean,
-        gust: chunk.reduce((a,b)=>a + b.gust, 0) / chunk.length,
-        wave: chunk.reduce((a,b)=>a + (b.wave ?? 0), 0) / chunk.length
+      const mid = chunk[Math.floor(chunk.length / 2)];
+      aggregated.push({
+        timestamp: mid.timestamp,
+        speed: chunk.reduce((a, b) => a + b.speed, 0) / chunk.length,
+        gust: chunk.reduce((a, b) => a + b.gust, 0) / chunk.length,
+        deg: meanDirectionDeg(chunk.map(r => ({ deg: r.deg, w: 1 }))),
+        wave: chunk.reduce((a, b) => a + b.wave, 0) / chunk.length,
+        source: mid.source
       });
     }
-    return out;
+    return aggregated;
   }
 
-  // History seed from Bat Yam (Open-Meteo hourly)
-  async function fetchOpenMeteoHistory(lat, lon, hoursBack = 24){
-    const url =
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
-      `&past_days=2&forecast_days=1&timezone=${encodeURIComponent(ISRAEL_TZ)}`;
-
-    const r = await fetch(url);
-    const j = await r.json();
-    const h = j.hourly || {};
-    const times = h.time || [];
-    const sp = h.wind_speed_10m || [];
-    const gd = h.wind_direction_10m || [];
-    const gu = h.wind_gusts_10m || [];
-
-    const now = Date.now();
-    const cutoff = now - hoursBack * 60 * 60 * 1000;
-
-    const kmhToMs = (k) => (Number(k || 0) / 3.6);
-
-    const out = [];
-    for (let i = 0; i < times.length; i++){
-      const ts = new Date(times[i]).getTime();
-      if (!Number.isFinite(ts)) continue;
-      if (ts < cutoff || ts > now) continue;
-
-      out.push({
-        timestamp: new Date(ts),
-        speed: kmhToMs(sp[i]),
-        gust: kmhToMs(gu[i] ?? sp[i]),
-        deg: Number(gd[i] ?? 0),
-        wave: null,
-        temp: null
-      });
-    }
-    return out;
-  }
-  async function fetchOpenMeteoPoint(lat, lon){
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const c = j.current || {};
-
-    // Open-Meteo returns km/h
-    const kmhToMs = (k) => (Number(k || 0) / 3.6);
-
-    return {
-      speed: kmhToMs(c.wind_speed_10m ?? 0),
-      deg: Number(c.wind_direction_10m ?? 0),
-      gust: kmhToMs(c.wind_gusts_10m ?? c.wind_speed_10m ?? 0)
-    };
-  }
-
-  async function fetchMETAR_LLBG(){
-    const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=LLBG&format=json`);
-    const arr = await r.json();
-    const m = arr && arr[0] ? arr[0] : null;
-    if (!m) return null;
-
-    const wspd = Number(m.wspd ?? 0);
-    const wgst = (m.wgst != null) ? Number(m.wgst) : null;
-    const wdir = Number(m.wdir ?? 0);
-
-    const knotsToMs = (k) => k * 0.514444;
-
-    return {
-      speed: knotsToMs(wspd),
-      gust: knotsToMs(wgst ?? wspd * 1.3),
-      deg: wdir
-    };
-  }
-
-  function parseWaveRangeFromText(text){
-    const re = /גובה\s*הגלים\s*:\s*(\d+)\s*[-–]\s*(\d+)\s*ס["״]?מ/;
-    const m = text.match(re);
-    if (!m) return null;
-    const minCm = Number(m[1]);
-    const maxCm = Number(m[2]);
-    if (!isFinite(minCm) || !isFinite(maxCm) || minCm <= 0 || maxCm <= 0) return null;
-    return { minCm, maxCm };
-  }
-
-  async function fetchTlvSeaWaveRange(){
-    try{
-      const r = await fetch(TLV_SEA_PAGE, { mode: 'cors' });
-      const t = await r.text();
-      const range = parseWaveRangeFromText(t);
-      if (range) return { ...range, source: 'דיווח' }; // ✅ בלי "עיריית תל אביב"
-    }catch(e){}
-
-    try{
-      const r = await fetch(JINA_PROXY(TLV_SEA_PAGE));
-      const t = await r.text();
-      const range = parseWaveRangeFromText(t);
-      if (range) return { ...range, source: 'דיווח' }; // ✅ בלי "עיריית תל אביב"
-    }catch(e){}
-
-    return null;
-  }
-
-  async function fetchWaveFallbackOpenMeteoMarine(){
-    const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${WAVE_COORDS.lat}&longitude=${WAVE_COORDS.lon}&current=wave_height,sea_surface_temperature&timezone=Asia/Jerusalem`;
-    const r = await fetch(url);
-    const j = await r.json();
-    return {
-      wave: j.current?.wave_height ?? 0.6,
-      waterTemp: j.current?.sea_surface_temperature ?? 23
-    };
-  }
-
-  async function fetchLiveData(){
-    const refreshIcon = document.getElementById('refreshIcon');
-    if (refreshIcon) refreshIcon.classList.add('fa-spin');
-
-    // --- OWM coastal points ---
-    const owmPromises = windSensorsOWM.map(s =>
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${s.lat}&lon=${s.lon}&appid=${OWM_API_KEY}&units=metric&lang=he`)
-        .then(r => r.json())
-        .then(data => ({
-          speed: Number(data.wind?.speed ?? 0),
-          deg: Number(data.wind?.deg ?? 0),
-          gust: Number(data.wind?.gust ?? ((data.wind?.speed ?? 0) * 1.2)),
-          temp: Number(data.main?.temp ?? 0)
-        }))
-        .catch(() => ({ speed: 0, deg: 0, gust: 0, temp: 0 }))
-    );
-
-    // --- Open-Meteo points ---
-    const omPromises = [
-      fetchOpenMeteoPoint(openMeteoPoints.herzliya.lat, openMeteoPoints.herzliya.lon),
-      fetchOpenMeteoPoint(openMeteoPoints.batyam.lat, openMeteoPoints.batyam.lon),
-      fetchOpenMeteoPoint(openMeteoPoints.rishon.lat, openMeteoPoints.rishon.lon)
-    ].map(p => p.catch(() => ({ speed: 0, deg: 0, gust: 0 })));
-
-    // --- METAR LLBG ---
-    const metarPromise = fetchMETAR_LLBG().catch(() => null);
-
-    // --- Waves: municipality preferred ---
-    const tlvWavePromise = fetchTlvSeaWaveRange().catch(() => null);
-
-    const [owmResults, omResults, metar, tlvWave] = await Promise.all([
-      Promise.all(owmPromises),
-      Promise.all(omPromises),
-      metarPromise,
-      tlvWavePromise
-    ]);
-
-    // Update per-coast sensors UI (speed, gust, dir)
-    setText('speed1', msToKnots1(owmResults[0]?.speed ?? 0));
-    setText('gust1',  msToKnots1(owmResults[0]?.gust ?? 0));
-    setRot('dirIcon1', owmResults[0]?.deg ?? 0);
-
-    setText('speed2', msToKnots1(owmResults[1]?.speed ?? 0));
-    setText('gust2',  msToKnots1(owmResults[1]?.gust ?? 0));
-    setRot('dirIcon2', owmResults[1]?.deg ?? 0);
-
-    setText('speed3', msToKnots1(owmResults[2]?.speed ?? 0));
-    setText('gust3',  msToKnots1(owmResults[2]?.gust ?? 0));
-    setRot('dirIcon3', owmResults[2]?.deg ?? 0);
-
-    // Open-Meteo cards
-    setText('omHerzliya', msToKnots1(omResults[0]?.speed ?? 0));
-    setText('omHerzliyaGust', msToKnots1(omResults[0]?.gust ?? 0));
-    setRot('omHerzliyaDir', omResults[0]?.deg ?? 0);
-
-    setText('omBatYam', msToKnots1(omResults[1]?.speed ?? 0));
-    setText('omBatYamGust', msToKnots1(omResults[1]?.gust ?? 0));
-    setRot('omBatYamDir', omResults[1]?.deg ?? 0);
-
-    setText('omRishon', msToKnots1(omResults[2]?.speed ?? 0));
-    setText('omRishonGust', msToKnots1(omResults[2]?.gust ?? 0));
-    setRot('omRishonDir', omResults[2]?.deg ?? 0);
-
-    // METAR card
-    if (metar){
-      setText('metarLLBG', msToKnots1(metar.speed));
-      setText('metarLLBGGust', msToKnots1(metar.gust));
-      setRot('metarLLBGDir', metar.deg ?? 0);
-    } else {
-      setText('metarLLBG', '--');
-      setText('metarLLBGGust', '--');
-      setRot('metarLLBGDir', 0);
-    }
-
-    // Water temp + wave height:
-    let waveMeters = null;
-    let waveRangeText = null;
-    let waterTemp = null;
-
-    if (tlvWave){
-      const { minCm, maxCm } = tlvWave;
-      const avgCm = (minCm + maxCm) / 2;
-      waveMeters = avgCm / 100;
-      waveRangeText = `טווח מדווח: ${minCm}–${maxCm} ס״מ`;
-      setText('waveSourceBadge', tlvWave.source); // "דיווח"
-    } else {
-      setText('waveSourceBadge', 'מודל');
-      try{
-        const marine = await fetchWaveFallbackOpenMeteoMarine();
-        waveMeters = marine.wave ?? 0.6;
-        waterTemp = marine.waterTemp ?? 23;
-        waveRangeText = 'טווח: לא זמין (מציג הערכה מודלית)';
-      } catch(e){
-        waveMeters = 0.6;
-        waveRangeText = 'טווח: לא זמין';
-      }
-    }
-
-    if (waterTemp == null){
-      try{
-        const marine = await fetchWaveFallbackOpenMeteoMarine();
-        waterTemp = marine.waterTemp ?? 23;
-      } catch(e){
-        waterTemp = 23;
-      }
-    }
-
-    setText('waveHeight', Number(waveMeters ?? 0.6).toFixed(1));
-    setText('waveRangeText', waveRangeText || '--');
-    setText('waterTempMain', Number(waterTemp).toFixed(0) + '°');
-    setText('waterTempSide', Number(waterTemp).toFixed(0) + '°');
-
-    // Weighted blend (wind)
-    const parts = [];
-
-    const wOWM = 0.18; // each -> 0.54 total
-    owmResults.forEach(r => parts.push({ speed: r.speed, gust: r.gust, deg: r.deg, w: wOWM }));
-
-    const wOM = 0.10;  // each -> 0.30 total
-    omResults.forEach(r => parts.push({ speed: r.speed, gust: r.gust, deg: r.deg, w: wOM }));
-
-    if (metar) parts.push({ speed: metar.speed, gust: metar.gust, deg: metar.deg, w: 0.16 });
-
-    const totalW = parts.reduce((a,b)=>a + b.w, 0) || 1;
-
-    const avgSpeed = parts.reduce((a,b)=>a + b.speed*b.w, 0) / totalW;
-    const avgGust  = parts.reduce((a,b)=>a + b.gust*b.w, 0) / totalW;
-    const avgDeg   = meanDirectionDeg(parts.map(p => ({ deg: p.deg, w: p.w })));
-
-    // Decision + Confidence (based on sensors)
-    const nowTs = Date.now();
-    const sensors = [];
-
-    sensors.push({ name: "OWM הילטון", avgKnots: msToKnots(owmResults[0]?.speed ?? 0), ts: nowTs });
-    sensors.push({ name: "OWM קלור",   avgKnots: msToKnots(owmResults[1]?.speed ?? 0), ts: nowTs });
-    sensors.push({ name: "OWM יפו",    avgKnots: msToKnots(owmResults[2]?.speed ?? 0), ts: nowTs });
-
-    sensors.push({ name: "OM הרצליה", avgKnots: msToKnots(omResults[0]?.speed ?? 0), ts: nowTs });
-    sensors.push({ name: "OM בת ים",  avgKnots: msToKnots(omResults[1]?.speed ?? 0), ts: nowTs });
-    sensors.push({ name: "OM ראשלצ",  avgKnots: msToKnots(omResults[2]?.speed ?? 0), ts: nowTs });
-
-    if (metar){
-      sensors.push({ name: "METAR LLBG", avgKnots: msToKnots(metar.speed ?? 0), ts: nowTs });
-    }
-
-    const prefs = loadPrefs();
-    const fusedAvgKnots = msToKnots(avgSpeed);
-
-    const dc = computeDecisionAndConfidence({
-      fusedAvgKnots,
-      sensors,
-      nowTs,
-      prefs
-    });
-    renderDecisionBar(dc);
-
-    // Store reading
-    const reading = {
-      timestamp: new Date(),
-      speed: avgSpeed,
-      gust: avgGust,
-      deg: avgDeg,
-      wave: waveMeters ?? 0.6,
-      waterTemp: waterTemp ?? 23,
-      temp: (owmResults[0]?.temp ?? 0)
-    };
-
-    state.readings.push(reading);
-    state.liveCount += 1;
-
-    // Default to 15min until we have 60 live points
-    if (state.liveCount < 60){
-      state.currentInterval = "15min";
-      document.getElementById('btn-1min').classList.toggle('active', false);
-      document.getElementById('btn-15min').classList.toggle('active', true);
-    }
-
-    if (state.readings.length > 1440) state.readings.shift();
-
-    // Update main UI
-    setText('currentSpeed', msToKnots1(avgSpeed));
-    setText('windDir', getDir(avgDeg));
-    setText('windGust', msToKnots1(avgGust));
-    setText('temp', (reading.temp ?? 0).toFixed(0) + '°');
-
-    const arrow = document.getElementById('compassArrow');
-    if (arrow) arrow.style.transform = `translateX(-50%) rotate(${avgDeg}deg)`;
-
-    if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-
-    renderHistory();
-  }
-
-  function renderHistory(){
+  function renderHistory() {
     if (!state.readings.length) return;
-
-    const last24h = state.readings.filter(r => (new Date() - r.timestamp) / (1000*60*60) <= 24);
-    let dataToShow = (state.currentInterval === '15min') ? aggregateEvery15(last24h) : last24h;
-    if (!dataToShow.length) return;
-
-    ensureChart();
-
-    const labels = dataToShow.map(p => p.timestamp.toLocaleTimeString('he-IL', {
-      timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+    
+    const last24h = state.readings.filter(r => (Date.now() - r.timestamp) < 24 * 60 * 60 * 1000);
+    const data = aggregateData(last24h, state.currentInterval);
+    
+    if (!windChart) initChart();
+    
+    const labels = data.map(r => r.timestamp.toLocaleTimeString('he-IL', {
+      timeZone: CONFIG.ISRAEL_TZ, hour: '2-digit', minute: '2-digit', hour12: false
     }));
+    
+    windChart.data.labels = labels;
+    windChart.data.datasets[0].data = data.map(r => msToKnots(r.speed));
+    windChart.data.datasets[1].data = data.map(r => msToKnots(r.gust));
+    windChart.update('none');
 
-    const speedKn = dataToShow.map(p => Number((p.speed * KNOTS).toFixed(2)));
-    const gustKn  = dataToShow.map(p => Number((p.gust  * KNOTS).toFixed(2)));
-
-    windChartInstance.data.labels = labels;
-    windChartInstance.data.datasets[0].data = speedKn;
-    windChartInstance.data.datasets[1].data = gustKn;
-    windChartInstance.update('none');
-
-    const table = document.getElementById('recentHoursTable');
-    const recent = dataToShow.slice(-20).reverse();
-
-    table.innerHTML = recent.map(p => {
-      const timeStr = p.timestamp.toLocaleTimeString('he-IL', {
-        timeZone: ISRAEL_TZ, hour:'2-digit', minute:'2-digit', hour12:false
+    const tableBody = $('recentHoursTable');
+    const recent = data.slice(-20).reverse();
+    
+    tableBody.innerHTML = recent.map(r => {
+      const timeStr = r.timestamp.toLocaleTimeString('he-IL', {
+        timeZone: CONFIG.ISRAEL_TZ, hour: '2-digit', minute: '2-digit'
       });
-
-      const waveCell = (p.wave == null) ? '--' : Number(p.wave).toFixed(1);
-
+      const sourceBadge = r.source?.includes('ims') ? 
+        '<span class="badge ims text-xs">IMS</span>' : 
+        '<span class="badge text-xs">מעורב</span>';
+      
       return `
-        <tr class="border-b border-slate-200 hover:bg-slate-50">
-          <td class="whitespace-nowrap font-mono text-slate-700">${timeStr}</td>
-          <td class="font-extrabold text-slate-900">${(p.speed*KNOTS).toFixed(1)}</td>
-          <td class="font-extrabold text-orange-600">${(p.gust*KNOTS).toFixed(1)}</td>
+        <tr class="transition-colors hover:bg-slate-50">
+          <td class="font-mono text-slate-600">${timeStr}</td>
+          <td>${sourceBadge}</td>
+          <td class="font-bold text-slate-800">${msToKnotsStr(r.speed)}</td>
+          <td class="font-bold text-orange-600">${msToKnotsStr(r.gust)}</td>
           <td class="text-center">
-            <i class="fas fa-arrow-up text-sky-700" title="${getDir(p.deg)}"
-               style="transform: rotate(${p.deg}deg); display:inline-block;"></i>
+            <i class="fas fa-arrow-up text-sky-700 inline-block" style="transform: rotate(${r.deg}deg)"></i>
+            <span class="text-xs text-slate-400 mr-1">${getDir(r.deg)}</span>
           </td>
-          <td class="whitespace-nowrap text-amber-700 font-bold">${waveCell}</td>
+          <td class="text-amber-700 font-medium">${r.wave.toFixed(1)}</td>
         </tr>
       `;
     }).join('');
   }
 
+  function setIntervalMode(mode) {
+    state.currentInterval = mode;
+    $('btn-1min').classList.toggle('active', mode === '1min');
+    $('btn-15min').classList.toggle('active', mode === '15min');
+    renderHistory();
+  }
+
+  // ==================== Modal ====================
+  function openPrefs() {
+    const prefs = loadPrefs();
+    $('prefWeight').value = prefs.weightKg;
+    $('prefKite').value = prefs.kiteM2;
+    $('prefDiscipline').value = prefs.discipline;
+    $('prefMinWind').value = prefs.minWind || '';
+    $('prefsModal').classList.add('visible');
+  }
+
+  function closePrefs() {
+    $('prefsModal').classList.remove('visible');
+  }
+
+  function savePrefs() {
+    const prefs = {
+      weightKg: Number($('prefWeight').value) || 75,
+      kiteM2: Number($('prefKite').value) || 12,
+      discipline: $('prefDiscipline').value || 'tt',
+      minWind: Number($('prefMinWind').value) || null
+    };
+    savePrefsToStorage(prefs);
+    closePrefs();
+    fetchAllData();
+  }
+
+  function resetPrefs() {
+    savePrefsToStorage(defaultPrefs);
+    openPrefs();
+  }
+
+  // ==================== Initialization ====================
+  function init() {
+    // Clock
+    setInterval(() => {
+      $('israelTime').textContent = formatTime(new Date());
+    }, 1000);
+
+    // Fetch on load
+    fetchAllData();
+    
+    // Auto refresh
+    setInterval(fetchAllData, CONFIG.UPDATE_INTERVAL);
+
+    // Close modal on outside click
+    $('prefsModal').addEventListener('click', (e) => {
+      if (e.target === $('prefsModal')) closePrefs();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePrefs();
+      if (e.key === 'r' || e.key === 'R') fetchAllData();
+    });
+  }
+
   // Start
-  (async () => {
-    // Seed history from Bat Yam (Open-Meteo hourly)
-    const hist = await fetchOpenMeteoHistory(openMeteoPoints.batyam.lat, openMeteoPoints.batyam.lon, 24)
-      .catch(() => []);
-
-    if (hist.length){
-      state.readings = hist;
-      state.currentInterval = "15min";
-      document.getElementById('btn-1min').classList.toggle('active', false);
-      document.getElementById('btn-15min').classList.toggle('active', true);
-      renderHistory();
-    }
-
-    await fetchLiveData();
-    setInterval(fetchLiveData, 60000);
-  })();
-
-  window.addEventListener('resize', () => {
-    if (windChartInstance) windChartInstance.resize();
-  });
+  init();
 </script>
 </body>
 </html>
