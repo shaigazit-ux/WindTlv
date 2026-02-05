@@ -212,10 +212,15 @@
     .sensor-card:hover { border-color: var(--brand); transform: translateY(-2px); }
     .sensor-card.ims { border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.03); }
     .sensor-card.ims:hover { border-color: var(--ims); }
+    .sensor-card.ims-primary { 
+      border-color: rgba(124, 58, 237, 0.5); 
+      background: rgba(124, 58, 237, 0.06);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+    }
     
     .sensor-title { font-size: 0.8rem; color: #64748b; font-weight: 700; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem; }
     .sensor-speed { font-size: 1.8rem; font-weight: 900; color: var(--wind); line-height: 1; }
-    .sensor-card.ims .sensor-speed { color: var(--ims); }
+    .sensor-card.ims .sensor-speed, .sensor-card.ims-primary .sensor-speed { color: var(--ims); }
     .sensor-meta { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
     .sensor-status { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     .status-fresh { background: var(--success); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
@@ -287,6 +292,12 @@
     }
     .source-indicator.ims {
       background: linear-gradient(90deg, var(--ims), #a78bfa);
+    }
+
+    .ims-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
     }
   </style>
 </head>
@@ -372,7 +383,7 @@
               <span id="currentSpeed" class="text-7xl font-extrabold text-sky-700 tracking-tight">--</span>
               <span class="text-2xl font-bold text-slate-400">קשר</span>
             </div>
-            <p class="text-xs text-slate-400 mt-2">ממוצע משוקלל מ-IMS (44, 64), OWM ו-Open-Meteo</p>
+            <p class="text-xs text-slate-400 mt-2">ממוצע משוקלל מ-4 תחנות IMS (11, 16, 44, 64)</p>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -399,7 +410,7 @@
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <span class="badge ims"><i class="fas fa-building-columns"></i> IMS 44, 64</span>
+            <span class="badge ims"><i class="fas fa-building-columns"></i> IMS רשמי</span>
             <span class="badge"><i class="fas fa-cloud"></i> OpenWeatherMap</span>
             <span class="badge"><i class="fas fa-satellite"></i> Open-Meteo</span>
           </div>
@@ -453,22 +464,27 @@
       </div>
     </section>
 
-    <!-- IMS Stations - Featured -->
+    <!-- IMS Coastal Stations - Primary -->
     <section class="card p-6 border-2 border-purple-200 bg-purple-50/30">
       <div class="source-indicator ims"></div>
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
             <i class="fas fa-building-columns text-purple-600"></i>
-            תחנות IMS רשמיות
+            תחנות חוף IMS רשמיות
           </h2>
-          <p class="text-sm text-slate-500 mt-1">נתונים ישירות מהשירות המטאורולוגי הישראלי</p>
+          <p class="text-sm text-slate-500 mt-1">ארבע תחנות מטאורולוגיות רשמיות לאורך חוף תל אביב והסביבה</p>
         </div>
         <span class="badge ims">מקור ראשי</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="imsStationsGrid">
+      <div class="ims-grid" id="imsCoastalGrid">
         <!-- IMS stations populated here -->
+      </div>
+      
+      <div class="mt-4 p-3 bg-purple-100 rounded-lg text-sm text-purple-800">
+        <i class="fas fa-info-circle ml-1"></i>
+        <strong>תחנות IMS:</strong> 11 הרצליה, 16 בת ים, 44 תל אביב חוף, 64 מרכז הארץ (בית דגן). התחנות מודדות בגובה 10 מטר מעל פני הים.
       </div>
     </section>
 
@@ -480,12 +496,42 @@
             <i class="fas fa-network-wired text-slate-600"></i>
             חיישנים משניים
           </h2>
-          <p class="text-sm text-slate-500 mt-1">השלמת נתונים ממקורות נוספים</p>
+          <p class="text-sm text-slate-500 mt-1">השלמת נתונים ממקורות נוספים להשוואה</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="secondarySensorsGrid">
         <!-- Secondary sensors populated here -->
+      </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+          <i class="fas fa-table text-slate-600"></i>
+          השוואת תחנות בזמן אמת
+        </h2>
+        <span class="badge ims">לחץ על תחנה לפרטים</span>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="table-tight">
+          <thead>
+            <tr>
+              <th>מקור</th>
+              <th>סוג</th>
+              <th>רוח (קשר)</th>
+              <th>משבים (קשר)</th>
+              <th>כיוון</th>
+              <th>טמפ'</th>
+              <th>סטטוס</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonTable">
+            <tr><td colspan="7" class="text-center py-8 text-slate-400">טוען נתונים...</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -612,15 +658,19 @@
   // ==================== Configuration ====================
   const CONFIG = {
     OWM_API_KEY: '0429ca60a348cdac63a6cc4547a6837d',
-    IMS_API_KEY: '1a901e45-9028-44ff-bd2c-35e82407fb9b',
     KNOTS: 1.94384,
     ISRAEL_TZ: 'Asia/Jerusalem',
     UPDATE_INTERVAL: 60000,
     
-    // IMS Stations - Updated based on your request
+    // Proxy URL - שלך
+    PROXY_URL: 'https://ims-proxy-chi.vercel.app/api/ims',
+    
+    // IMS Stations
     IMS_STATIONS: {
-      telAvivCoast: 44,    // תל אביב חוף - Station 44 (better location than 178)
-      central: 64          // בית דagan - Station 64 (representing "מרכז הארץ")
+      herzliya: 11,     // הרצליה מרינה
+      batYam: 16,       // בת ים
+      telAvivCoast: 44, // תל אביב חוף
+      central: 64       // מרכז הארץ (בית דגן)
     }
   };
 
@@ -641,39 +691,53 @@
     minWind: null 
   };
 
-  // ==================== Sensor Definitions - Updated ====================
+  // ==================== Sensor Definitions ====================
   const sensorDefs = {
-    // IMS Stations - Primary sources (higher weight)
     ims: [
+      { 
+        id: 'ims11', 
+        stationId: 11, 
+        name: 'הרצליה מרינה', 
+        region: 'צפון',
+        weight: 0.20,
+        location: 'רחוב אנגל 1, מרינה הרצליה',
+        type: 'coastal'
+      },
+      { 
+        id: 'ims16', 
+        stationId: 16, 
+        name: 'בת ים', 
+        region: 'דרום',
+        weight: 0.20,
+        location: 'חוף בת ים',
+        type: 'coastal'
+      },
       { 
         id: 'ims44', 
         stationId: 44, 
         name: 'תל אביב חוף', 
-        region: 'חוף הים',
-        weight: 0.30, // 30% - Primary coastal station
-        location: '50 מטר מהים, רחוב אנגל'
+        region: 'מרכז',
+        weight: 0.25,
+        location: 'רחוב אנגל 50, חוף תל אביב',
+        type: 'coastal'
       },
       { 
         id: 'ims64', 
         stationId: 64, 
         name: 'מרכז הארץ', 
-        region: 'בית דגן',
-        weight: 0.20, // 20% - Inland reference
-        location: 'מרכז השירות המטאורולוגי'
+        region: 'מזרחי',
+        weight: 0.15,
+        location: 'בית דגן - מטה השירות המטאורולוגי',
+        type: 'inland'
       }
     ],
-    // OWM - Secondary
     owm: [
-      { id: 'hilton', lat: 32.1101, lon: 34.7795, name: 'הילטון', region: 'צפון', weight: 0.15 },
-      // Removed: clore (קלור), jaffa (יפו) as requested
+      { id: 'hilton', lat: 32.1101, lon: 34.7795, name: 'הילטון', region: 'צפון', weight: 0.10 }
     ],
-    // Open-Meteo - Secondary
     openmeteo: [
-      { id: 'herzliya', lat: 32.1656, lon: 34.8368, name: 'הרצליה', weight: 0.12 },
-      { id: 'batyam', lat: 32.0167, lon: 34.7500, name: 'בת ים', weight: 0.13 },
-      // Removed: rishon (ראשל"צ) as requested
+      { id: 'herzliya', lat: 32.1656, lon: 34.8368, name: 'הרצליה', weight: 0.05 },
+      { id: 'batyam', lat: 32.0167, lon: 34.7500, name: 'בת ים', weight: 0.05 }
     ]
-    // Removed: METAR LLBG (replaced by IMS 64)
   };
 
   // ==================== Utilities ====================
@@ -710,7 +774,7 @@
   // ==================== Storage ====================
   function loadPrefs() {
     try {
-      const raw = localStorage.getItem('windtlv_prefs_v4');
+      const raw = localStorage.getItem('windtlv_prefs_v6');
       return raw ? { ...defaultPrefs, ...JSON.parse(raw) } : { ...defaultPrefs };
     } catch {
       return { ...defaultPrefs };
@@ -718,7 +782,7 @@
   }
 
   function savePrefsToStorage(prefs) {
-    try { localStorage.setItem('windtlv_prefs_v4', JSON.stringify(prefs)); } catch {}
+    try { localStorage.setItem('windtlv_prefs_v6', JSON.stringify(prefs)); } catch {}
   }
 
   // ==================== Wind Calculations ====================
@@ -744,38 +808,29 @@
     return Math.max(5, need);
   }
 
-  // ==================== IMS API Functions ====================
+  // ==================== IMS API via Proxy ====================
   
-  // Try multiple approaches to fetch IMS data
   async function fetchIMSData(stationId) {
-    // Approach 1: Direct API call (will likely fail due to CORS in browser)
-    const urls = [
-      `https://api.ims.gov.il/v1/envista/stations/${stationId}/data/latest`,
-      `https://api.ims.gov.il/v1/stations/${stationId}/data/latest`
-    ];
-
-    for (const url of urls) {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': `ApiToken ${CONFIG.IMS_API_KEY}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          mode: 'cors'
-        });
-        
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        return parseIMSResponse(data);
-      } catch (error) {
-        console.warn(`Failed to fetch from ${url}:`, error);
-        continue;
+    try {
+      const response = await fetch(`${CONFIG.PROXY_URL}?stationId=${stationId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        console.warn(`Station ${stationId} returned ${response.status}`);
+        return null;
       }
+      
+      const data = await response.json();
+      return parseIMSResponse(data);
+    } catch (error) {
+      console.error(`Proxy error for station ${stationId}:`, error);
+      return null;
     }
-    
-    return null;
   }
 
   function parseIMSResponse(data) {
@@ -783,7 +838,6 @@
       return null;
     }
 
-    // Get the most recent reading
     const latest = data.data[0];
     const channels = latest.channels || [];
     
@@ -792,45 +846,34 @@
       raw: latest
     };
 
-    // Find wind speed channel (WS)
-    const wsChannel = channels.find(c => 
-      c.id === 'WS' || c.name === 'WS' || c.channelId === 'WS'
-    );
+    // Wind speed (WS)
+    const wsChannel = channels.find(c => c.id === 'WS' || c.name?.includes('WS'));
     if (wsChannel && wsChannel.value !== undefined && wsChannel.value !== -999) {
       result.speed = parseFloat(wsChannel.value);
     }
 
-    // Find wind direction channel (WD)
-    const wdChannel = channels.find(c => 
-      c.id === 'WD' || c.name === 'WD' || c.channelId === 'WD'
-    );
+    // Wind direction (WD)
+    const wdChannel = channels.find(c => c.id === 'WD' || c.name?.includes('WD'));
     if (wdChannel && wdChannel.value !== undefined && wdChannel.value !== -999) {
       result.deg = parseFloat(wdChannel.value);
     }
 
-    // Find max wind speed / gusts (WSMAX or WS1mm)
-    const wsMaxChannel = channels.find(c => 
-      c.id === 'WSMAX' || c.name === 'WSMAX' || c.channelId === 'WSMAX'
-    );
-    const ws1mmChannel = channels.find(c => 
-      c.id === 'WS1mm' || c.name === 'WS1mm' || c.channelId === 'WS1mm'
-    );
-    
+    // Gusts (WSMAX or WS1mm)
+    const wsMaxChannel = channels.find(c => c.id === 'WSMAX' || c.name?.includes('WSMAX'));
+    const ws1mmChannel = channels.find(c => c.id === 'WS1mm' || c.name?.includes('WS1mm'));
     if (wsMaxChannel && wsMaxChannel.value !== undefined && wsMaxChannel.value !== -999) {
       result.gust = parseFloat(wsMaxChannel.value);
     } else if (ws1mmChannel && ws1mmChannel.value !== undefined && ws1mmChannel.value !== -999) {
       result.gust = parseFloat(ws1mmChannel.value);
     }
 
-    // Find temperature (TD)
-    const tdChannel = channels.find(c => 
-      c.id === 'TD' || c.name === 'TD' || c.channelId === 'TD'
-    );
+    // Temperature (TD)
+    const tdChannel = channels.find(c => c.id === 'TD' || c.name?.includes('TD'));
     if (tdChannel && tdChannel.value !== undefined && tdChannel.value !== -999) {
       result.temp = parseFloat(tdChannel.value);
     }
 
-    // Estimate gust if not available
+    // Estimate gust if missing
     if (!result.gust && result.speed) {
       result.gust = result.speed * 1.3;
     }
@@ -839,11 +882,11 @@
   }
 
   // ==================== Other Data Sources ====================
-  async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+  async function fetchWithTimeout(url, timeout = 10000) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
     try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
+      const response = await fetch(url, { signal: controller.signal });
       clearTimeout(id);
       return response;
     } catch (error) {
@@ -893,8 +936,8 @@
   }
 
   // ==================== UI Rendering ====================
-  function createSensorCard(sensor, data, options = {}) {
-    const isIMS = sensor.type === 'ims' || sensor.stationId;
+  function createSensorCard(sensor, data, isPrimary = false) {
+    const isIMS = sensor.stationId !== undefined;
     const hasData = data && Number.isFinite(data.speed);
     const speed = hasData ? msToKnotsStr(data.speed) : '--';
     const gust = hasData ? msToKnotsStr(data.gust || data.speed * 1.2) : '--';
@@ -909,10 +952,8 @@
     const isFresh = age < 20;
     const statusClass = hasData ? (isFresh ? 'status-fresh' : 'status-stale') : 'status-offline';
     
-    const cardClass = isIMS ? 'sensor-card ims' : 'sensor-card';
+    const cardClass = isIMS ? (isPrimary ? 'sensor-card ims-primary' : 'sensor-card ims') : 'sensor-card';
     const icon = isIMS ? 'fa-building-columns' : 'fa-location-dot';
-    
-    const locationInfo = sensor.location ? `<div class="text-xs text-slate-400 mt-1">${sensor.location}</div>` : '';
     
     return `
       <div class="${cardClass}" id="card-${sensor.id}">
@@ -920,13 +961,13 @@
         <div class="flex items-center justify-between mb-2">
           <div class="sensor-title">
             <i class="fas ${icon} ml-1 ${isIMS ? 'text-purple-600' : ''}"></i>
-            ${sensor.name}
+            <strong>${sensor.name}</strong>
             ${sensor.region ? `<span class="text-slate-400 text-xs">(${sensor.region})</span>` : ''}
           </div>
           <span class="sensor-status ${statusClass}"></span>
         </div>
         <div class="sensor-speed">${speed} <span class="text-sm text-slate-500">קשר</span></div>
-        ${locationInfo}
+        ${sensor.location ? `<div class="text-xs text-slate-400 mt-1">${sensor.location}</div>` : ''}
         <div class="sensor-meta">
           <span><i class="fas fa-bolt text-orange-500 ml-1"></i>${gust}</span>
           <span class="flex items-center gap-1">
@@ -939,33 +980,80 @@
     `;
   }
 
-  function renderIMSStations() {
-    const container = $('imsStationsGrid');
+  function renderIMSCoastal() {
+    const container = $('imsCoastalGrid');
     const html = sensorDefs.ims.map(ims => {
       const data = state.imsData[ims.id];
-      return createSensorCard(ims, data);
+      return createSensorCard(ims, data, true);
     }).join('');
     
-    container.innerHTML = html || '<div class="col-span-2 text-center py-4 text-slate-400">טוען נתוני IMS...</div>';
+    container.innerHTML = html || '<div class="col-span-full text-center py-4 text-slate-400">טוען נתוני IMS...</div>';
   }
 
   function renderSecondarySensors() {
     const container = $('secondarySensorsGrid');
     const html = [];
     
-    // OWM
     sensorDefs.owm.forEach(s => {
       const data = state.sensorData[s.id];
       if (data) html.push(createSensorCard(s, data));
     });
     
-    // Open-Meteo
     sensorDefs.openmeteo.forEach(s => {
       const data = state.sensorData[s.id];
       if (data) html.push(createSensorCard(s, data));
     });
     
     container.innerHTML = html.join('') || '<div class="col-span-full text-center text-slate-400">אין נתונים זמינים</div>';
+  }
+
+  function renderComparisonTable() {
+    const tbody = $('comparisonTable');
+    const rows = [];
+    
+    // Add IMS stations
+    sensorDefs.ims.forEach(ims => {
+      const data = state.imsData[ims.id];
+      if (data && data.speed) {
+        rows.push({
+          name: ims.name,
+          type: 'IMS',
+          speed: msToKnotsStr(data.speed),
+          gust: msToKnotsStr(data.gust || data.speed * 1.2),
+          dir: `${getDir(data.deg || 0)} (${Math.round(data.deg || 0)}°)`,
+          temp: data.temp ? `${data.temp.toFixed(1)}°C` : '--',
+          status: 'active'
+        });
+      }
+    });
+    
+    // Add OWM
+    sensorDefs.owm.forEach(s => {
+      const data = state.sensorData[s.id];
+      if (data && data.speed) {
+        rows.push({
+          name: s.name,
+          type: 'OWM',
+          speed: msToKnotsStr(data.speed),
+          gust: msToKnotsStr(data.gust || data.speed * 1.2),
+          dir: `${getDir(data.deg || 0)} (${Math.round(data.deg || 0)}°)`,
+          temp: data.temp ? `${data.temp.toFixed(1)}°C` : '--',
+          status: 'active'
+        });
+      }
+    });
+    
+    tbody.innerHTML = rows.map(row => `
+      <tr class="transition-colors hover:bg-slate-50">
+        <td class="font-bold">${row.name}</td>
+        <td><span class="badge ${row.type === 'IMS' ? 'ims' : ''}">${row.type}</span></td>
+        <td class="font-extrabold text-slate-800">${row.speed}</td>
+        <td class="font-bold text-orange-600">${row.gust}</td>
+        <td>${row.dir}</td>
+        <td>${row.temp}</td>
+        <td><span class="text-emerald-500"><i class="fas fa-check-circle"></i></span></td>
+      </tr>
+    `).join('') || '<tr><td colspan="7" class="text-center py-4 text-slate-400">אין נתונים זמינים</td></tr>';
   }
 
   // ==================== Decision Logic ====================
@@ -985,10 +1073,8 @@
 
     const hasIMS = sensorReadings.some(s => s.source === 'ims' && s.speed > 0);
     const activeSensors = sensorReadings.filter(s => s.ts && (Date.now() - s.ts) < 30 * 60000);
-    const confidence = hasIMS ? 
-      Math.min(95, 70 + activeSensors.length * 5) : 
-      Math.min(75, activeSensors.length * 15);
-
+    const confidence = hasIMS ? Math.min(95, 70 + activeSensors.length * 5) : Math.min(75, activeSensors.length * 15);
+    
     return { status, ...titles[status], confidence, hasIMS };
   }
 
@@ -1017,7 +1103,7 @@
     const now = Date.now();
     const sensorReadings = [];
 
-    // 1. Fetch IMS Stations (Primary)
+    // 1. Fetch all 4 IMS stations via Proxy
     for (const ims of sensorDefs.ims) {
       try {
         const data = await fetchIMSData(ims.stationId);
@@ -1030,25 +1116,12 @@
             ts: data.timestamp.getTime(),
             weight: ims.weight
           });
+          console.log(`✅ IMS ${ims.stationId} (${ims.name}): ${msToKnotsStr(data.speed)} קשר`);
+        } else {
+          console.warn(`❌ IMS ${ims.stationId} - no data`);
         }
       } catch (error) {
-        console.warn(`Failed to fetch IMS ${ims.stationId}:`, error);
-        // Try fallback: Open-Meteo near the station location
-        if (ims.stationId === 44) { // Tel Aviv Coast
-          try {
-            const fallback = await fetchOpenMeteo(32.1093, 34.8555); // Approximate location
-            if (fallback.speed) {
-              state.imsData[ims.id] = { ...fallback, isFallback: true };
-              sensorReadings.push({
-                source: 'openmeteo-fallback',
-                id: ims.id,
-                speed: msToKnots(fallback.speed),
-                ts: fallback.timestamp,
-                weight: ims.weight * 0.7 // Reduce weight for fallback
-              });
-            }
-          } catch (e) {}
-        }
+        console.error(`❌ IMS ${ims.stationId} failed:`, error);
       }
     }
 
@@ -1122,14 +1195,13 @@
     $('windDirDeg').textContent = `${Math.round(avgDeg)}°`;
     $('windGust').textContent = msToKnotsStr(avgGust);
     
-    // Temperature from IMS 44 (Tel Aviv Coast) or fallback
-    const tempSource = state.imsData['ims44'] || state.sensorData['hilton'];
+    const tempSource = state.imsData['ims44'] || state.imsData['ims11'] || state.sensorData['hilton'];
     $('temp').textContent = tempSource?.temp ? `${Math.round(tempSource.temp)}°` : '--';
     
     $('waterTempMain').textContent = marineData.waterTemp ? `${Math.round(marineData.waterTemp)}°` : '--';
     $('waterTempSide').textContent = marineData.waterTemp ? `${Math.round(marineData.waterTemp)}°` : '--';
     $('waveHeight').textContent = marineData.wave ? marineData.wave.toFixed(1) : '--';
-    $('waveRangeText').textContent = marineData.wave ? `הערכה מודלית: ${(marineData.wave * 0.7).toFixed(1)} - ${(marineData.wave * 1.3).toFixed(1)} מ׳` : '--';
+    $('waveRangeText').textContent = marineData.wave ? `טווח: ${(marineData.wave * 0.7).toFixed(1)} - ${(marineData.wave * 1.3).toFixed(1)} מ׳` : '--';
     $('waveSourceBadge').textContent = 'מודל ימי';
 
     // Compass
@@ -1158,13 +1230,16 @@
     state.lastFetch = now;
     $('lastUpdate').textContent = `עודכן: ${formatTime(new Date())}`;
 
-    // Render sections
-    renderIMSStations();
+    // Render all sections
+    renderIMSCoastal();
     renderSecondarySensors();
+    renderComparisonTable();
     renderHistory();
     
     btn.disabled = false;
     icon.classList.remove('fa-spin');
+    
+    console.log('✅ Fetch complete');
   }
 
   // ==================== Chart ====================
@@ -1215,10 +1290,7 @@
             bodyColor: '#0f172a',
             borderColor: '#e2e8f0',
             borderWidth: 1,
-            padding: 12,
-            callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)} קשר`
-            }
+            padding: 12
           }
         },
         scales: {
